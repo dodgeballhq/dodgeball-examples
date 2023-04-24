@@ -71,6 +71,7 @@ typings/
 # dotenv environment variables file
 .env
 .env.test
+.env.docker.local.merged
 
 # parcel-bundler cache (https://parceljs.org/)
 .cache
@@ -102,3 +103,38 @@ dist
 
 # TernJS port file
 .tern-port
+
+# IntelliJ IDEA files
+.idea
+
+# VSCode
+.vscode
+
+# Temp Directories for containers
+.containers
+
+# Temp Directories for data
+.data
+
+# Ignore local ormconfig.json in order to avoid playing poorly with app configs
+ormconfig.json
+
+#Ignore files used to exchange user tokens
+db_user.json
+dodgeball_config
+
+# Python virtual environment
+.venv
+
+# Terraform
+.terraform
+.terraform.lock.hcl
+
+.DS_Store
+
+# YALC
+.yalc
+yalc.lock
+
+# Build files
+.last_build_pid
