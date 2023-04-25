@@ -8,7 +8,7 @@ using dotenv.net;
  */
 public static class SimpleEnv
 {
-    private static Dictionary<string, string>? s_lookups = null;
+    private static IDictionary<string, string>? s_lookups = null;
 
     public static string? GetEnv(string key)
     {
@@ -16,8 +16,21 @@ public static class SimpleEnv
         {
             if (SimpleEnv.s_lookups == null)
             {
-                
+                var root = Directory.GetCurrentDirectory();
+                var dotenv = Path.Combine(root, ".env");
+                var dotEnvOptions = new DotEnvOptions();
+                DotEnv.Load();
+                SimpleEnv.s_lookups = DotEnv.Read();
             }
+
+            return s_lookups[key];
+        }
+        catch (Exception exc)
+        {
+            Console.WriteLine(
+                "Could not look up key: " + (key ?? "null"));
+            
+            return null;
         }
     }
     

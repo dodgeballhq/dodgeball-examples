@@ -1,71 +1,92 @@
-using Dodgeball.TrustServer.Api;
+using System.Net;
+using System.Security;
 using Microsoft.AspNetCore.Mvc;
-
-using Dodgeball.TrustServer.Api;
+using Newtonsoft.Json;
+using DodgeballApi = Dodgeball.TrustServer.Api;
+using JsonSerializer = System.Text.Json.JsonSerializer;
 
 namespace Dodgeball.Examples.ProtectedService;
-
-public class SampleTransactionResult
-{
-    /*
-     * If we had a database backing this example,
-     * this would be the key of some Primary
-     * Key on an approved transaction, or perhaps
-     * a summary of the transaction
-     */
-    public string SampleConfirmationCode { get; set; }
-    
-    /*
-     * Marker to indicate whether the client must re-submit
-     * after handling Front End operations such as MFA
-     */
-    public bool   RequiresResubmit { get; set; }
-    
-    /*
-     * Dodgeball Verification Object, representing the
-     * Back End summary of operations.  Most relevant
-     */
-    public DodgeballVerification Verification { get; set; }
-}
 
 [Produces("application/json")]
 public class ClientTransactionController : Controller
 {
     [HttpPost]
-    public async Task<IActionResult> postTransaction()
-    { 
-      var privateKey = this.Vars["PRIVATE_API_KEY"];
-      var dodgeball = new Dodgeball(
-        privateKey);
-      
-      var dbResponse = await dodgeball.Checkpoint(
-        new DodgeballEvent(
-          "WITH_MFA",
-          "128.103.69.86",
-          checkpointData),
-        null,
-        dateString,
-        "test@dodgeballhq.com"
-      );
-
-      Assert.IsTrue(dbResponse.success);
-
-      if (dodgeball.IsAllowed(dbResponse))
+    public async Task<IActionResult> Transaction()
+    {
+      try
       {
-        // This is the scenario under which we have completed 
-        // But we should be in blocked state with MFA
-        Assert.Fail("We should be blocked");
-      } else if (dodgeball.IsDenied(dbResponse)) {
-        Console.WriteLine("Pass a forbidden response to client");
-      } else if (dodgeball.IsRunning(dbResponse)) {
-        Console.WriteLine("Pass control back to the JS Client to render MFA");
+        var privateKey = SimpleEnv.GetEnv("PRIVATE_API_KEY");
+        var dodgeball = new DodgeballApi.Dodgeball(
+          privateKey,
+          new DodgeballApi.DodgeballConfig
+          {
+            ApiUrl = SimpleEnv.GetEnv("BASE_URL")
+          });
+
+        var checkpointData = this.CreateSampleData();
+
+        var dbResponse = await dodgeball.Checkpoint(
+          new DodgeballApi.DodgeballEvent(
+            /*
+             * Any valid checkpoint name may be used, but we generally
+             * instantiate PAYMENT checkpoints on behalf of clients.
+             */
+            "PAYMENT",
+
+            /*
+             * Hard-coded IP, to be converted to a real IP in practice
+             */
+            "128.103.69.86",
+            checkpointData),
+          null,
+          DateTime.Now.Date.ToShortDateString(),
+
+          /*
+           * Hard-coded fake email for simplicity
+           */
+          "test@dodgeballhq.com"
+        );
+
+        if (dodgeball.IsAllowed(dbResponse))
+        {
+          var result = new SampleTransactionResult(dbResponse.verification);
+          return this.Ok(result);
+        }
+        else if (dodgeball.IsDenied(dbResponse))
+        {
+          Console.WriteLine("Pass a forbidden response to client");
+          return Ok(new SampleTransactionResult(
+            dbResponse.verification,
+            false,
+            null));
+        }
+        else if (dodgeball.IsRunning(dbResponse))
+        {
+          Console.WriteLine("Pass control back to the JS Client to render MFA");
+
+          return Ok(new SampleTransactionResult(
+            dbResponse.verification,
+            true,
+            null));
+
+        }
+        else
+        {
+          Console.WriteLine("An error occurred");
+          return Ok(new SampleTransactionResult(
+            dbResponse.verification,
+            false,
+            null));
+        }
       }
-      else
+      catch (Exception exc)
       {
-        Assert.Fail("This is an error state!");
-      } 
-      
-        return Ok();
+        Console.WriteLine("Error: ${0}", exc);
+
+        var response = new HttpResponseMessage(HttpStatusCode.UnprocessableEntity);
+        response.Content = new StringContent(exc.ToString());
+        return this.BadRequest(exc);
+      }
     }
 
     private object CreateSampleData()
@@ -107,7 +128,7 @@ public class ClientTransactionController : Controller
           // For now we set a hard-coded list of phone numbers, this can
           // be filled in from the client in order to dynamically set
           // MFA phone numbers
-          mfaPhoneNumbers = this.Vars["MFA_PHONE_NUMBERS"],
+          mfaPhoneNumbers = SimpleEnv.GetEnv("MFA_PHONE_NUMBERS"),
           email = "test@dodgeballhq.com",
           // Gr4vy Testing
           gr4vy = new
@@ -228,8 +249,8 @@ public class ClientTransactionController : Controller
             }
           }
         };
-      
-      return checkpointData
+
+      return checkpointData;
     }
     
 }
