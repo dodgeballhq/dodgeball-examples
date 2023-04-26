@@ -1,0 +1,19 @@
+{
+  "name": "dodgeball-example-nodejs",
+  "version": "1.0.0",
+  "description": "An example of using Dodgeball with a NodeJS server.",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node index.js"
+  },
+  "author": "Patrick Teague",
+  "license": "ISC",
+  "dependencies": {
+    "@dodgeball/trust-sdk-server": "^0.0.23",
+    "cors": "^2.8.5",
+    "dotenv": "^16.0.3",
+    "express": "^4.18.2"
+  }
+}
