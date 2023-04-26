@@ -29,7 +29,7 @@ The NodeJS examples are contained in the `server/nodejs` folder. To start the No
 
 ```
 DODGEBALL_PRIVATE_API_KEY="whatever-your-private-key-is"
-DODGEBALL_API_URL="https://app.sandbox.dodgeballhq.com" # (Optional) set this to make calls to a Sandbox environment
+DODGEBALL_API_URL="https://api.sandbox.dodgeballhq.com" # (Optional) set this to make calls to a Sandbox environment
 ```
 
 2. Run the following commands:
@@ -73,7 +73,7 @@ The Web example is found in `client/web` and can be started by following these s
 
 ```
 REACT_APP_DODGEBALL_PUBLIC_API_KEY="whatever-your-public-key-is"
-REACT_APP_DODGEBALL_API_URL="https://app.sandbox.dodgeballhq.com" # (Optional) set this to make calls to a Sandbox environment
+REACT_APP_DODGEBALL_API_URL="https://api.sandbox.dodgeballhq.com" # (Optional) set this to make calls to a Sandbox environment
 ```
 
 2. Run these commands:

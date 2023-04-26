@@ -20,10 +20,14 @@ const dodgeball = new Dodgeball(process.env.DODGEBALL_PRIVATE_API_KEY, {
 
 // Here's a simple utility method for grabbing the originating IP address from the request.
 const getIp = (req) => {
-  return (
+  const incomingIp =
     req.headers["x-forwarded-for"]?.split(",").shift() ||
-    req.socket?.remoteAddress
-  );
+    req.socket?.remoteAddress;
+
+  if (incomingIp === '::1') {
+    console.log('RETURNING HARD CODED IP');
+    return '76.90.54.224';
+  }
 };
 
 app.post('/checkpoint', async (req, res) => {
