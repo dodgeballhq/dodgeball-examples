@@ -1,7 +1,7 @@
 # dodgeball-examples
 
 ## Purpose
-This repository contains simple example applications to get you started with Dodgeball. You should use these
+This repository contains simple example applications to get you started with Dodgeball.
 
 ## How to Use
 To orchestrate and protect the full user-journey, Dodgeball offers SDKs for both the server and client side.
