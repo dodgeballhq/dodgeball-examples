@@ -15,7 +15,6 @@
     "axios": "^1.3.6",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "react-json-editor-ajrm": "^2.5.14",
     "react-scripts": "5.0.1",
     "typescript": "^4.9.5",
     "uuid": "^9.0.0",
@@ -44,8 +43,5 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
-  },
-  "devDependencies": {
-    "@types/react-json-editor-ajrm": "^2.5.3"
   }
 }

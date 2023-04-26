@@ -1,14 +1,8 @@
 import { useDodgeball, DodgeballApiVersion } from "@dodgeball/trust-sdk-client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import axios from "axios";
-// import JSONInput from "react-json-editor-ajrm";
-// // import locale from "react-json-editor-ajrm/locale/en";
-// import { dark_vscode_tribute, localeEn } from "./jsonEditor";
 import { v4 as uuidv4 } from "uuid";
 import "./App.css";
-
-const DODGEBALL_PUBLIC_API_KEY = "4ce402ac5c7111ec"; // Fill in with your public API key
-const DODGEBALL_API_URL = "http://localhost:3001"; // Fill in with your API URL
 
 interface IUser {
   id: string;
@@ -16,16 +10,21 @@ interface IUser {
 }
 
 export default function App() {
-  const dodgeball = useDodgeball(DODGEBALL_PUBLIC_API_KEY, {
-    apiUrl: DODGEBALL_API_URL,
-    apiVersion: DodgeballApiVersion.v1,
-  }); // Once initialized, you can omit the public API key
+  const dodgeball = useDodgeball(
+    process.env.REACT_APP_DODGEBALL_PUBLIC_API_KEY,
+    {
+      apiUrl: process.env.REACT_APP_DODGEBALL_API_URL,
+      apiVersion: DodgeballApiVersion.v1,
+    }
+  ); // Once initialized, you can omit the public API key
 
   const [currentUser, setCurrentUser] = useState<IUser | null>(null);
   const [currentSessionId, setCurrentSessionId] = useState<any>(null);
   const [userList, setUserList] = useState<IUser[]>([]);
   const [checkpointName, setCheckpointName] = useState<string>("");
-  const [payloadValue, setPayloadValue] = useState<string>("{}");
+  const [payloadValue, setPayloadValue] = useState<string>(
+    JSON.stringify(JSON.parse('{"example": "payload"}'), null, 2)
+  );
   const [anonymousSessions, setAnonymousSessions] = useState<string[]>([]);
 
   const [isSubmittingCheckpoint, setIsSubmittingCheckpoint] = useState(false);
@@ -40,7 +39,6 @@ export default function App() {
   }, [isCheckpointSubmitted]);
 
   useEffect(() => {
-    console.log("DODGEBALL TRACK CALLED", currentUser?.id, currentSessionId);
     /* 
       When you know the ID of the currently logged-in user, 
       pass it along with a session ID to dodgeball.track():
@@ -48,8 +46,25 @@ export default function App() {
     dodgeball.track(currentSessionId, currentUser?.id);
   }, [currentUser?.id, currentSessionId]);
 
+  const hasPayloadError = useMemo(() => {
+    try {
+      JSON.stringify(JSON.parse(payloadValue), null, 2);
+      return false;
+    } catch (e) {
+      return true;
+    }
+  }, [payloadValue]);
+
+  const canSubmitCheckpoint = useMemo(() => {
+    return (
+      !hasPayloadError &&
+      checkpointName?.length >= 3 &&
+      payloadValue?.length > 0 &&
+      currentSessionId
+    );
+  }, [checkpointName, payloadValue, hasPayloadError, currentSessionId]);
+
   const submitCheckpoint = async (
-    payload: any,
     previousVerificationId: string | null = null
   ) => {
     const sourceToken = await dodgeball.getSourceToken();
@@ -61,29 +76,28 @@ export default function App() {
         sessionId: currentSessionId,
         userId: currentUser?.id,
         checkpointName: checkpointName,
-      },
-      {
-        headers: {
-          "x-dodgeball-source-token": sourceToken, // Pass the source token to your API
-          "x-dodgeball-verification-id": previousVerificationId, // If a previous verification was performed, pass it along to your API
-        },
+        sourceToken: sourceToken,
+        verificationId: previousVerificationId,
       }
     );
+
+    console.log("ENDPOINT RESPONSE", endpointResponse);
 
     dodgeball.handleVerification(endpointResponse.data.verification, {
       onVerified: async (verification) => {
         // If an additional check was performed and the request is approved, simply pass the verification ID in to your API
         setStatus("VERIFIED");
-        await submitCheckpoint(payload, verification.id);
+        await submitCheckpoint(verification.id);
       },
       onApproved: async () => {
         // If no additional check was required, update the view to show that the order was placed
-        setIsCheckpointSubmitted(true);
         setStatus("APPROVED");
+        setIsSubmittingCheckpoint(false);
       },
       onDenied: async (verification) => {
         // If the action was denied, update the view to show the rejection
         setStatus("DENIED");
+        setIsSubmittingCheckpoint(false);
       },
       onError: async (error) => {
         setStatus("ERROR");
@@ -97,14 +111,13 @@ export default function App() {
   const onCallCheckpointClick = async () => {
     setIsSubmittingCheckpoint(true);
 
-    await submitCheckpoint({});
+    await submitCheckpoint();
   };
 
   const selectSessionId = (
     sessionId: string | null,
     forUser: IUser | null = null
   ) => {
-    console.log("SELECT SESSION ID CALLED", sessionId, forUser);
     if (!sessionId) {
       sessionId = uuidv4();
     }
@@ -118,10 +131,7 @@ export default function App() {
         (session) => session === sessionId
       );
 
-      console.log("FOUND SESSION", foundSession);
-
       if (!foundSession) {
-        console.log("ADD SESSION", sessionId, [...forUser.sessions, sessionId]);
         const updatedUser = {
           ...forUser,
           sessions: [...forUser.sessions, sessionId],
@@ -154,7 +164,6 @@ export default function App() {
     userId: string | null,
     sessionId: string | null = null
   ) => {
-    console.log("SELECT USER CALLEd", userId, sessionId);
     if (!userId) {
       const newUser = {
         id: uuidv4(),
@@ -186,7 +195,9 @@ export default function App() {
 
   const selectAnonymousUser = () => {
     setCurrentUser(null);
-    setCurrentSessionId(null);
+    setCurrentSessionId(
+      anonymousSessions.length > 0 ? anonymousSessions[0] : null
+    );
   };
 
   const selectAnonymousSession = (sessionId: string | null = null) => {
@@ -204,25 +215,25 @@ export default function App() {
     try {
       let parsedPayload = JSON.parse(payloadValue);
       formattedPayload = JSON.stringify(parsedPayload, null, 2);
-    } catch (e) {
-      // console.log(e);
-    }
+    } catch (e) {}
 
     setPayloadValue(formattedPayload);
   };
 
   return (
     <div>
-      <h2>Call a Checkpoint</h2>
-      <p>
-        This example is built using the Dodgeball Client SDK. You can use it to
-        call checkpoints on your Dodgeball account and pass in arbitrary event
-        data. Use it to experiment!
-      </p>
+      <div className="header-container">
+        <h2>Call a Checkpoint</h2>
+        <p>
+          This example is built using the Dodgeball Client SDK. You can use it
+          to call checkpoints on your Dodgeball account and pass in arbitrary
+          event data. Use it to experiment!
+        </p>
+      </div>
       <div className="container">
         <div className="left-column">
           <div className="field-group">
-            <div>
+            <div className="field-label">
               <label htmlFor="checkpoint-name">Checkpoint Name</label>
             </div>
             <input
@@ -235,16 +246,9 @@ export default function App() {
             />
           </div>
           <div className="field-group">
-            <div>
+            <div className="field-label">
               <label htmlFor="checkpoint-payload">Checkpoint Payload</label>
             </div>
-            {/* <JSONInput
-              id="checkpoint-payload"
-              placeholder={{}}
-              colors={dark_vscode_tribute}
-              locale={localeEn}
-              height="300px"
-            /> */}
             <textarea
               className="payload-input"
               name="checkpoint-payload"
@@ -254,18 +258,24 @@ export default function App() {
               rows={4}
               cols={20}
             />
+            {hasPayloadError && (
+              <div className="error-message">
+                Make sure you enter valid JSON.
+              </div>
+            )}
           </div>
         </div>
         <div className="right-column">
           <div>
-            <div>Choose a user ID</div>
+            <div className="user-selector-title">Choose a User ID</div>
             {userList.map((user) => {
               const isSelected = user.id === currentUser?.id;
 
               return (
-                <div>
+                <div className="user-item-container">
                   <label>
                     <input
+                      className="radio-input"
                       type="radio"
                       value={user.id}
                       key={user.id}
@@ -281,7 +291,9 @@ export default function App() {
                   </label>
                   {isSelected && (
                     <div className="user-session-list">
-                      <div>Choose a Session ID</div>
+                      <div className="session-selector-title">
+                        Choose a Session ID
+                      </div>
                       <div>
                         {user.sessions.map((sessionId) => {
                           const isSessionSelected =
@@ -291,6 +303,7 @@ export default function App() {
                             <div>
                               <label>
                                 <input
+                                  className="radio-input"
                                   type="radio"
                                   value={sessionId}
                                   key={sessionId}
@@ -305,7 +318,7 @@ export default function App() {
                           );
                         })}
                       </div>
-                      <div>
+                      <div className="add-button-container">
                         <button onClick={() => selectUser(user.id, null)}>
                           New Session
                         </button>
@@ -315,9 +328,10 @@ export default function App() {
                 </div>
               );
             })}
-            <div>
+            <div className="user-item-container">
               <label>
                 <input
+                  className="radio-input"
                   type="radio"
                   checked={currentUser === null}
                   value={"Anonymous"}
@@ -327,7 +341,9 @@ export default function App() {
               </label>
               {currentUser === null && (
                 <div className="user-session-list">
-                  <div>Choose a Session ID</div>
+                  <div className="session-selector-title">
+                    Choose a Session ID
+                  </div>
                   <div>
                     {anonymousSessions.map((sessionId) => {
                       const isSessionSelected = sessionId === currentSessionId;
@@ -348,7 +364,7 @@ export default function App() {
                       );
                     })}
                   </div>
-                  <div>
+                  <div className="add-button-container">
                     <button onClick={() => selectAnonymousSession(null)}>
                       New Anonymous Session
                     </button>
@@ -356,24 +372,24 @@ export default function App() {
                 </div>
               )}
             </div>
-            <div>
+            <div className="add-button-container">
               <button onClick={() => selectUser(null)}>New User</button>
             </div>
           </div>
         </div>
       </div>
       <div className="submit-button-container">
+        <button
+          onClick={onCallCheckpointClick}
+          disabled={isSubmittingCheckpoint || !canSubmitCheckpoint}
+        >
+          {isSubmittingCheckpoint ? "Submitting..." : "Call Checkpoint"}
+        </button>
         {status && (
           <div className="checkpoint-status">
             Latest Checkpoint Response: {status}
           </div>
         )}
-        <button
-          onClick={onCallCheckpointClick}
-          disabled={isSubmittingCheckpoint}
-        >
-          {isSubmittingCheckpoint ? "Submitting..." : "Call Checkpoint"}
-        </button>
       </div>
     </div>
   );
