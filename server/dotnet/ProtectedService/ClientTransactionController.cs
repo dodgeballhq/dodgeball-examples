@@ -5,7 +5,7 @@ using Newtonsoft.Json;
 using DodgeballApi = Dodgeball.TrustServer.Api;
 using JsonSerializer = System.Text.Json.JsonSerializer;
 
-namespace Dodgeball.Examples.ProtectedService;
+namespace Dodgeball.Examples.ProtectedService.Controllers;
 
 [Produces("application/json")]
 public class ClientTransactionController : Controller
@@ -252,5 +252,4 @@ public class ClientTransactionController : Controller
 
       return checkpointData;
     }
-    
 }
