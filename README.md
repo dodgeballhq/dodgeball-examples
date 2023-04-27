@@ -11,7 +11,6 @@ The `client` folder contains all client-side examples (i.e. code that runs on th
 
 The `server` folder contains all server-side examples:
 - [NodeJS](#nodejs)
-- [ASP.NET](#asp-net-example)
 
 You should use these examples along with the [official Dodgeball documentation](https://docs.dodgeballhq.com) to experiment with your Dodgeball account. You will need a [free Dodgeball account](https://app.dodgeballhq.com/signup) to run these examples. 
 
@@ -43,25 +42,6 @@ npm start
 This will spin up a simple express HTTP server listening on port 3020.
 
 Now that you've got the server configured and started, try modifying it!
-
-### ASP.NET
-
-The ASP.NET examples are contained in the `server/dotnet` folder. To start the ASP.NET example server, do the following:
-
-1. Paste your `DODGEBALL_PRIVATE_API_KEY` into `server/dotnet/ProtectedService/.env`. Your private API key can be found in the Dodgeball Trust Console in the Developer Center under the API Keys tab.
-
-2. Run the following commands:
-
-```
-cd server/dotnet/ProtectedService
-dotnet watch
-```
-
-This will spin up a simple ASP.NET example HTTP server listening on port `3020`.
-
-Now that you've got the server configured and started, try modifying it!
-
-Take a look at the `ProtectedService/ClientTransactionController.cs` file for an example of how to call a checkpoint called `PAYMENT` in Dodgeball. You'll see how to send data to a checkpoint and how to use the SDK to handle the response. Play around with modifying your `PAYMENT` checkpoint in the Dodgeball Trust Console to see how you can orchestrate your application's trust and safety logic.
 
 ## Client-Side Examples
 
