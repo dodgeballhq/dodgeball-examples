@@ -29,9 +29,7 @@ export default function App() {
 
   const [isSubmittingCheckpoint, setIsSubmittingCheckpoint] = useState(false);
   const [isCheckpointSubmitted, setIsCheckpointSubmitted] = useState(false);
-  const [status, setStatus] = useState<
-    "VERIFIED" | "APPROVED" | "DENIED" | "ERROR" | null
-  >(null);
+  const [status, setStatus] = useState<string | null>(null);
   const [error, setError] = useState<any>(null);
 
   useEffect(() => {
@@ -89,14 +87,22 @@ export default function App() {
         setStatus("VERIFIED");
         await submitCheckpoint(verification.id);
       },
-      onApproved: async () => {
+      onApproved: async (verification) => {
         // If no additional check was required, update the view to show that the order was placed
-        setStatus("APPROVED");
+        if (verification?.stepData?.customMessage) {
+          setStatus(`APPROVED: ${verification.stepData.customMessage}`);
+        } else {
+          setStatus("APPROVED");
+        }
         setIsSubmittingCheckpoint(false);
       },
       onDenied: async (verification) => {
         // If the action was denied, update the view to show the rejection
-        setStatus("DENIED");
+        if (verification?.stepData?.customMessage) {
+          setStatus(`DENIED: ${verification.stepData.customMessage}`);
+        } else {
+          setStatus("DENIED");
+        }
         setIsSubmittingCheckpoint(false);
       },
       onError: async (error) => {

@@ -59,7 +59,7 @@ app.post('/checkpoint', async (req, res) => {
     });
   } else if (dodgeball.isDenied(checkpointResponse)) {
     // If the request is denied, you can return the verification to the frontend to display a reason message
-    return res.status(403).json({
+    return res.status(200).json({
       verification: checkpointResponse.verification
     });
   } else {
