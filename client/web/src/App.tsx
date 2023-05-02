@@ -65,9 +65,10 @@ export default function App() {
   const submitCheckpoint = async (
     previousVerificationId: string | null = null
   ) => {
+    setError(null);
     const sourceToken = await dodgeball.getSourceToken();
-
-    const endpointResponse = await axios.post(
+    try {
+      const endpointResponse = await axios.post(
       "http://localhost:3020/checkpoint",
       {
         payload: JSON.parse(payloadValue),
@@ -76,47 +77,48 @@ export default function App() {
         checkpointName: checkpointName,
         sourceToken: sourceToken,
         verificationId: previousVerificationId,
-      }
-    );
+      });
+      console.log("ENDPOINT RESPONSE", endpointResponse);
 
-    console.log("ENDPOINT RESPONSE", endpointResponse);
-
-    dodgeball.handleVerification(endpointResponse.data.verification, {
-      onVerified: async (verification) => {
-        // If an additional check was performed and the request is approved, simply pass the verification ID in to your API
-        setStatus("VERIFIED");
-        await submitCheckpoint(verification.id);
-      },
-      onApproved: async (verification) => {
-        // If no additional check was required, update the view to show that the order was placed
-        if (verification?.stepData?.customMessage) {
-          setStatus(`APPROVED: ${verification.stepData.customMessage}`);
-        } else {
-          setStatus("APPROVED");
-        }
-        setIsSubmittingCheckpoint(false);
-      },
-      onDenied: async (verification) => {
-        // If the action was denied, update the view to show the rejection
-        if (verification?.stepData?.customMessage) {
-          setStatus(`DENIED: ${verification.stepData.customMessage}`);
-        } else {
-          setStatus("DENIED");
-        }
-        setIsSubmittingCheckpoint(false);
-      },
-      onError: async (error) => {
-        setStatus("ERROR");
-        // If there was an error performing the verification, display it
-        setError(error); // Usage Note: If the user cancels the verification, error.errorType = "CANCELLED"
-        setIsSubmittingCheckpoint(false);
-      },
-    });
+      dodgeball.handleVerification(endpointResponse.data.verification, {
+        onVerified: async (verification) => {
+          // If an additional check was performed and the request is approved, simply pass the verification ID in to your API
+          setStatus("VERIFIED");
+          await submitCheckpoint(verification.id);
+        },
+        onApproved: async (verification) => {
+          // If no additional check was required, update the view to show that the order was placed
+          if (verification?.stepData?.customMessage) {
+            setStatus(`APPROVED: ${verification.stepData.customMessage}`);
+          } else {
+            setStatus("APPROVED");
+          }
+          setIsSubmittingCheckpoint(false);
+        },
+        onDenied: async (verification) => {
+          // If the action was denied, update the view to show the rejection
+          if (verification?.stepData?.customMessage) {
+            setStatus(`DENIED: ${verification.stepData.customMessage}`);
+          } else {
+            setStatus("DENIED");
+          }
+          setIsSubmittingCheckpoint(false);
+        },
+        onError: async (error) => {
+          setStatus("ERROR");
+          // If there was an error performing the verification, display it
+          setError(error); // Usage Note: If the user cancels the verification, error.errorType = "CANCELLED"
+          setIsSubmittingCheckpoint(false);
+        },
+      });
+    } catch (error: any) {
+      setError(error?.message);
+      setIsSubmittingCheckpoint(false);
+    }
   };
 
   const onCallCheckpointClick = async () => {
     setIsSubmittingCheckpoint(true);
-
     await submitCheckpoint();
   };
 
@@ -396,6 +398,7 @@ export default function App() {
             Latest Checkpoint Response: {status}
           </div>
         )}
+        {error && <div className="error-message">{error}</div>}
       </div>
     </div>
   );

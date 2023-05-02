@@ -58,13 +58,9 @@ REACT_APP_DODGEBALL_API_URL="https://api.sandbox.dodgeballhq.com" # (Optional) s
 
 2. Run these commands:
 
-Install dependencies:
 ```
+cd client/web
 npm install
-```
-
-Start the server:
-```
 npm start
 ```
 
