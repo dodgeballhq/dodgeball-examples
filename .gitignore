@@ -119,6 +119,7 @@ ormconfig.json
 
 # Python virtual environment
 .venv
+__pycache__
 
 # Terraform
 .terraform
