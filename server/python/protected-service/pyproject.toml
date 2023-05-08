@@ -1,0 +1,18 @@
+[tool.poetry]
+name = "protected-service"
+version = "1.0.0"
+description = "Sample Server Side Project illustrating the use of the Dodgeball Trust SDK for Python"
+authors = ["Andrew Schwartz <tools@dodgeballhq.com>"]
+readme = "README.md"
+packages = [{include = "protected_service"}]
+
+[tool.poetry.dependencies]
+python = "^3.9"
+dodgeball-server-sdk = "^1.0.0"
+fastapi = "^0.95.1"
+uvicorn = {extras = ["standard"], version = "^0.22.0"}
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
