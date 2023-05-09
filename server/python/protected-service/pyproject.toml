@@ -8,7 +8,7 @@ packages = [{include = "protected_service"}]
 
 [tool.poetry.dependencies]
 python = "^3.9"
-dodgeball-server-sdk = "^1.0.0"
+dodgeball-server-sdk = "^1.0.1"
 fastapi = "^0.95.1"
 uvicorn = {extras = ["standard"], version = "^0.22.0"}
 
