@@ -47,8 +47,8 @@ class ExampleResponseData(BaseModel):
 @app.post("/checkpoint", status_code=200)
 async def executeCheckpoint(data: ExampleData, response: Response)->ExampleResponseData:
     try:
-        base_url = SimpleEnv.get_value("BASE_URL")
-        secret_key = SimpleEnv.get_value("PRIVATE_API_KEY")
+        base_url = SimpleEnv.get_value("DODGEBALL_API_URL")
+        secret_key = SimpleEnv.get_value("DODGEBALL_PRIVATE_API_KEY")
 
         db_agent = Dodgeball(
             secret_key,

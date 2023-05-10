@@ -11,6 +11,7 @@ The `client` folder contains all client-side examples (i.e. code that runs on th
 
 The `server` folder contains all server-side examples:
 - [NodeJS](#nodejs)
+- [Python](#python)
 
 You should use these examples along with the [official Dodgeball documentation](https://docs.dodgeballhq.com) to experiment with your Dodgeball account. You will need a [free Dodgeball account](https://app.dodgeballhq.com/signup) to run these examples. 
 
@@ -42,6 +43,38 @@ npm start
 This will spin up a simple express HTTP server listening on port 3020.
 
 Now that you've got the server configured and started, try modifying it!
+
+### Python
+
+The Python examples are contained in the `server/python` folder. To start the Python example server, do the following:
+
+1. Paste your `DODGEBALL_PRIVATE_API_KEY` into a new file: `server/python/protected-service/.env`. Your `.env` should look like this:
+
+```
+DODGEBALL_PRIVATE_API_KEY="whatever-your-private-key-is"
+DODGEBALL_API_URL="https://api.sandbox.dodgeballhq.com" 
+```
+
+2.  Make sure you have poetry installed on your local machine.  If not, install it following the instructions at: https://python-poetry.org/docs/
+
+
+3. To initialize the poetry infrastructure, execute once:
+```
+cd server/python/protected-service
+poetry init
+```
+
+4. To execute the python server example, execute (in the same directory):
+
+```
+poetry shell
+python protected_service/protected_main.py
+```
+
+This will spin up a simple express HTTP server listening on port 3020.
+
+Now that you've got the server configured and started, try modifying it!
+
 
 ## Client-Side Examples
 
