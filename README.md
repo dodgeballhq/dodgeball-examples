@@ -12,6 +12,7 @@ The `client` folder contains all client-side examples (i.e. code that runs on th
 The `server` folder contains all server-side examples:
 - [NodeJS](#nodejs)
 - [Python](#python)
+- [.NET](#dotnet)
 
 You should use these examples along with the [official Dodgeball documentation](https://docs.dodgeballhq.com) to experiment with your Dodgeball account. You will need a [free Dodgeball account](https://app.dodgeballhq.com/signup) to run these examples. 
 
@@ -74,6 +75,34 @@ python protected_service/protected_main.py
 This will spin up a simple express HTTP server listening on port 3020.
 
 Now that you've got the server configured and started, try modifying it!
+
+### .NET
+
+The .NET examples are contained in the `server/dotnet` folder. To start the .NET example server, do the following:
+
+1. Paste your `DODGEBALL_PRIVATE_API_KEY` into a new file: `server/dotnet/ProtectedService/.env`. Your `.env` should look like this:
+
+```
+DODGEBALL_PRIVATE_API_KEY="whatever-your-private-key-is"
+DODGEBALL_API_URL="https://api.sandbox.dodgeballhq.com" 
+```
+
+2. Make sure you have the full .NET environment installed on your machine.  We will describe how to proceed from the command line, but you may find it simpler to execute using your favorite IDE.
+
+3. Change directory to ProtectedService and build to validate that all packages are installed
+
+```
+cd ProtectedService
+dotnet build
+```
+
+4. Now run your server by executing:
+```
+  dotnet run
+```
+
+Now that you've got the server configured and started, try modifying it!
+
 
 
 ## Client-Side Examples
