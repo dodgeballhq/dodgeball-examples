@@ -1,5 +1,7 @@
 var builder = WebApplication.CreateBuilder(args);
+const string myAllowSpecificOrigins = "_myAllowSpecificOrigins";
 
+builder.Services.AddCors();
 // Add services to the container.
 builder.Services.AddControllers(options =>
 {
@@ -12,6 +14,11 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
+app.UseCors(x => x
+    .AllowAnyMethod()
+    .AllowAnyHeader()
+    .SetIsOriginAllowed(origin => true) // allow any origin
+    .AllowCredentials());
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -20,6 +27,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.UseCors();
 string welcomeText = @"
 Welcome to the Dodgeball Server Example for .NET.
 ";
