@@ -48,7 +48,7 @@ public class CheckpointController : Controller
             "76.90.54.224",
             new
             {
-              sourceValue = "Arbitrary Data"
+              sourceValue = "Arbitrary JSON-serializable data"
             })
         );
 
