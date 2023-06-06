@@ -37,7 +37,23 @@ public class CheckpointController : Controller
           {
             ApiUrl = SimpleEnv.GetEnv("DODGEBALL_API_URL")
           });
+        
+        // register a page event
+        var dbEvent = await dodgeball.PostEvent(
+          serviceRequest.sourceToken,
+          serviceRequest.sessionId,
+          serviceRequest.userId,
+          new DodgeballApi.DodgeballEvent(
+            "PROTECTED_SERVICE_PRE_CHECKPOINT",
+            "76.90.54.224",
+            new
+            {
+              sourceValue = "Arbitrary Data"
+            })
+        );
 
+        Console.WriteLine("Dodgeball Event", dbEvent);
+        
         var dbResponse = await dodgeball.Checkpoint(
           new DodgeballApi.DodgeballEvent(
             serviceRequest.checkpointName,
@@ -54,6 +70,14 @@ public class CheckpointController : Controller
           serviceRequest.verificationId
         );
 
+        
+        if (dbResponse.verification != null && 
+            dbResponse.verification.stepData != null && 
+            dbResponse.verification.stepData.customMessage != null)
+        {
+          Console.WriteLine("Step Data: " + dbResponse.verification.stepData.customMessage);
+        }
+        
         if (dodgeball.IsAllowed(dbResponse))
         {
           var result = new SampleTransactionResult(dbResponse.verification);
@@ -72,6 +96,12 @@ public class CheckpointController : Controller
         else if (dodgeball.IsDenied(dbResponse))
         {
           Console.WriteLine("Pass a forbidden response to client");
+
+          if (dbResponse.verification.stepData != null && dbResponse.verification.stepData.customMessage != null)
+          {
+            Console.WriteLine("Step Data: " + dbResponse.verification.stepData.customMessage);
+          }
+
           return StatusCode((int)HttpStatusCode.Forbidden,
             new SampleTransactionResult(
                     dbResponse.verification,
