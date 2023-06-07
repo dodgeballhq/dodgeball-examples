@@ -82,6 +82,7 @@ button {
   padding-right: 20px;
   padding-top: 10px;
   padding-bottom: 10px;
+  background-color: white;
 }
 
 .container {
@@ -138,7 +139,7 @@ button {
 }
 
 .field-group,
-.field-text-input {
+.field-checkpoint-name-input {
   width: 100%;
 }
 
@@ -190,6 +191,23 @@ button {
   border: 1px solid #ddd;
 }
 
+.user-item {
+  margin-bottom: 5px;
+}
+
 .radio-input {
   margin-right: 5px;
+}
+
+.field-text-input {
+  width: 350px;
+  margin-bottom: 5px;
+}
+
+.checkpoint-response-box {
+  padding: 10px;
+  margin-bottom: 20px;
+  border: 1px solid #ddd;
+  overflow-y: scroll;
+  max-height: 400px;
 }

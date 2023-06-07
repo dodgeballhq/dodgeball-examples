@@ -18,6 +18,15 @@ export default function App() {
     }
   ); // Once initialized, you can omit the public API key
 
+  const [selectedUserType, setSelectedUserType] = useState<
+    "SELECT" | "SPECIFIC" | "ANONYMOUS"
+  >("SELECT");
+  const [selectedSessionType, setSelectedSessionType] = useState<
+    "SELECT" | "SPECIFIC"
+  >("SELECT");
+  const [specificUserId, setSpecificUserId] = useState<string>("");
+  const [specificSessionId, setSpecificSessionId] = useState<string>("");
+
   const [currentUser, setCurrentUser] = useState<IUser | null>(null);
   const [currentSessionId, setCurrentSessionId] = useState<any>(null);
   const [userList, setUserList] = useState<IUser[]>([]);
@@ -26,6 +35,7 @@ export default function App() {
     JSON.stringify(JSON.parse('{"example": "payload"}'), null, 2)
   );
   const [anonymousSessions, setAnonymousSessions] = useState<string[]>([]);
+  const [specificSessions, setSpecificSessions] = useState<string[]>([]);
 
   const [isSubmittingCheckpoint, setIsSubmittingCheckpoint] = useState(false);
   const [isCheckpointSubmitted, setIsCheckpointSubmitted] = useState(false);
@@ -63,33 +73,36 @@ export default function App() {
   }, [checkpointName, payloadValue, hasPayloadError, currentSessionId]);
 
   const submitCheckpoint = async (
+    userId: string | null,
+    sessionId: string,
     previousVerificationId: string | null = null
   ) => {
     setError(null);
     const sourceToken = await dodgeball.getSourceToken();
     try {
       const endpointResponse = await axios.post(
-      "http://localhost:3020/checkpoint",
-      {
-        payload: JSON.parse(payloadValue),
-        sessionId: currentSessionId,
-        userId: currentUser?.id,
-        checkpointName: checkpointName,
-        sourceToken: sourceToken,
-        verificationId: previousVerificationId,
-      });
+        "http://localhost:3020/checkpoint",
+        {
+          payload: JSON.parse(payloadValue),
+          sessionId: sessionId,
+          userId: userId,
+          checkpointName: checkpointName,
+          sourceToken: sourceToken,
+          verificationId: previousVerificationId,
+        }
+      );
       console.log("ENDPOINT RESPONSE", endpointResponse);
 
       dodgeball.handleVerification(endpointResponse.data.verification, {
         onVerified: async (verification) => {
           // If an additional check was performed and the request is approved, simply pass the verification ID in to your API
           setStatus("VERIFIED");
-          await submitCheckpoint(verification.id);
+          await submitCheckpoint(userId, sessionId, verification.id);
         },
         onApproved: async (verification) => {
           // If no additional check was required, update the view to show that the order was placed
           if (verification?.stepData?.customMessage) {
-            setStatus(`APPROVED: ${verification.stepData.customMessage}`);
+            setStatus(`APPROVED:\n\n${verification.stepData.customMessage}`);
           } else {
             setStatus("APPROVED");
           }
@@ -98,7 +111,7 @@ export default function App() {
         onDenied: async (verification) => {
           // If the action was denied, update the view to show the rejection
           if (verification?.stepData?.customMessage) {
-            setStatus(`DENIED: ${verification.stepData.customMessage}`);
+            setStatus(`DENIED:\n\n${verification.stepData.customMessage}`);
           } else {
             setStatus("DENIED");
           }
@@ -118,8 +131,19 @@ export default function App() {
   };
 
   const onCallCheckpointClick = async () => {
+    let userId = currentUser?.id ?? null;
+    let sessionId = currentSessionId;
+
+    if (selectedUserType === "SPECIFIC") {
+      userId = specificUserId;
+    }
+
+    if (selectedSessionType === "SPECIFIC") {
+      sessionId = specificSessionId;
+    }
+
     setIsSubmittingCheckpoint(true);
-    await submitCheckpoint();
+    await submitCheckpoint(userId, sessionId);
   };
 
   const selectSessionId = (
@@ -172,6 +196,7 @@ export default function App() {
     userId: string | null,
     sessionId: string | null = null
   ) => {
+    setSelectedUserType("SELECT");
     if (!userId) {
       const newUser = {
         id: uuidv4(),
@@ -201,7 +226,27 @@ export default function App() {
     }
   };
 
+  const selectSession = (sessionId: string | null = null) => {
+    setSelectedSessionType("SELECT");
+
+    if (!sessionId) {
+      sessionId = uuidv4();
+      setSpecificSessions([sessionId, ...specificSessions]);
+    }
+    setCurrentSessionId(sessionId);
+  };
+
+  const selectSpecificUser = () => {
+    setSelectedUserType("SPECIFIC");
+    // setCurrentSessionId("SPECIFIC");
+  };
+
+  const selectSpecificSession = () => {
+    setSelectedSessionType("SPECIFIC");
+  };
+
   const selectAnonymousUser = () => {
+    setSelectedUserType("ANONYMOUS");
     setCurrentUser(null);
     setCurrentSessionId(
       anonymousSessions.length > 0 ? anonymousSessions[0] : null
@@ -245,12 +290,16 @@ export default function App() {
               <label htmlFor="checkpoint-name">Checkpoint Name</label>
             </div>
             <input
-              className="field-text-input"
+              className="field-checkpoint-name-input"
               name="checkpoint-name"
               type="text"
               placeholder="e.g. PAYMENT"
               value={checkpointName}
-              onChange={(e) => setCheckpointName(e.target.value)}
+              onChange={(e) =>
+                setCheckpointName(
+                  e.target.value?.toUpperCase()?.replace(/ /g, "_")
+                )
+              }
             />
           </div>
           <div className="field-group">
@@ -275,74 +324,151 @@ export default function App() {
         </div>
         <div className="right-column">
           <div>
-            <div className="user-selector-title">Choose a User ID</div>
-            {userList.map((user) => {
-              const isSelected = user.id === currentUser?.id;
-
-              return (
-                <div className="user-item-container">
+            <div className="user-selector-title">
+              Select a User and Session Option:
+            </div>
+            <div className="user-item-container">
+              <label>
+                <div className="field-label">Use a Custom User:</div>
+                <input
+                  className="radio-input"
+                  type="radio"
+                  checked={selectedUserType === "SPECIFIC"}
+                  value={"SPECIFIC"}
+                  onChange={() => selectSpecificUser()}
+                />
+                <input
+                  className="field-text-input"
+                  type="text"
+                  value={specificUserId}
+                  placeholder="Enter a specific User ID"
+                  onChange={(ev) => setSpecificUserId(ev.target.value)}
+                />
+              </label>
+              {selectedUserType === "SPECIFIC" && (
+                <div className="user-session-list">
                   <label>
+                    <div className="field-label">Choose a Session ID:</div>
                     <input
                       className="radio-input"
                       type="radio"
-                      value={user.id}
-                      key={user.id}
-                      checked={isSelected}
-                      onChange={() =>
-                        selectUser(
-                          user.id,
-                          user.sessions ? user.sessions[0] : null
-                        )
-                      }
+                      checked={selectedSessionType === "SPECIFIC"}
+                      value={"SPECIFIC"}
+                      onChange={() => selectSpecificSession()}
                     />
-                    {user.id}
+                    <input
+                      className="field-text-input"
+                      type="text"
+                      placeholder="Enter a Specific Session ID"
+                      value={specificSessionId}
+                      onChange={(ev) => setSpecificSessionId(ev.target.value)}
+                    />
                   </label>
-                  {isSelected && (
-                    <div className="user-session-list">
-                      <div className="session-selector-title">
-                        Choose a Session ID
-                      </div>
-                      <div>
-                        {user.sessions.map((sessionId) => {
-                          const isSessionSelected =
-                            sessionId === currentSessionId;
+                  <div>
+                    {specificSessions.map((sessionId) => {
+                      const isSessionSelected =
+                        selectedSessionType === "SELECT" &&
+                        sessionId === currentSessionId;
 
-                          return (
-                            <div>
-                              <label>
-                                <input
-                                  className="radio-input"
-                                  type="radio"
-                                  value={sessionId}
-                                  key={sessionId}
-                                  checked={isSessionSelected}
-                                  onChange={() =>
-                                    selectUser(user.id, sessionId)
-                                  }
-                                />
-                                {sessionId}
-                              </label>
-                            </div>
-                          );
-                        })}
-                      </div>
-                      <div className="add-button-container">
-                        <button onClick={() => selectUser(user.id, null)}>
-                          New Session
-                        </button>
-                      </div>
-                    </div>
-                  )}
+                      return (
+                        <div>
+                          <label>
+                            <input
+                              className="radio-input"
+                              type="radio"
+                              value={sessionId}
+                              key={sessionId}
+                              checked={isSessionSelected}
+                              onChange={() => selectSession(sessionId)}
+                            />
+                            {sessionId}
+                          </label>
+                        </div>
+                      );
+                    })}
+                  </div>
+                  <div className="add-button-container">
+                    <button onClick={() => selectSession(null)}>
+                      New Session
+                    </button>
+                  </div>
                 </div>
-              );
-            })}
+              )}
+            </div>
+            {userList.length > 0 && (
+              <div className="user-item-container">
+                <div className="field-label">Choose a User ID:</div>
+                {userList.map((user) => {
+                  const isSelected =
+                    selectedUserType === "SELECT" &&
+                    user.id === currentUser?.id;
+
+                  return (
+                    <div className="user-item">
+                      <label>
+                        <input
+                          className="radio-input"
+                          type="radio"
+                          value={user.id}
+                          key={user.id}
+                          checked={isSelected}
+                          onChange={() =>
+                            selectUser(
+                              user.id,
+                              user.sessions ? user.sessions[0] : null
+                            )
+                          }
+                        />
+                        {user.id}
+                      </label>
+                      {isSelected && (
+                        <div className="user-session-list">
+                          <div className="session-selector-title">
+                            Choose a Session ID
+                          </div>
+                          <div>
+                            {user.sessions.map((sessionId) => {
+                              const isSessionSelected =
+                                sessionId === currentSessionId;
+
+                              return (
+                                <div>
+                                  <label>
+                                    <input
+                                      className="radio-input"
+                                      type="radio"
+                                      value={sessionId}
+                                      key={sessionId}
+                                      checked={isSessionSelected}
+                                      onChange={() =>
+                                        selectUser(user.id, sessionId)
+                                      }
+                                    />
+                                    {sessionId}
+                                  </label>
+                                </div>
+                              );
+                            })}
+                          </div>
+                          <div className="add-button-container">
+                            <button onClick={() => selectUser(user.id, null)}>
+                              New Session
+                            </button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
             <div className="user-item-container">
               <label>
                 <input
                   className="radio-input"
                   type="radio"
-                  checked={currentUser === null}
-                  value={"Anonymous"}
+                  checked={selectedUserType === "ANONYMOUS"}
+                  value={"ANONYMOUS"}
                   onChange={() => selectAnonymousUser()}
                 />
                 {"Anonymous (No User ID)"}
@@ -395,7 +521,8 @@ export default function App() {
         </button>
         {status && (
           <div className="checkpoint-status">
-            Latest Checkpoint Response: {status}
+            Latest Checkpoint Response:
+            <pre className="checkpoint-response-box">{status}</pre>
           </div>
         )}
         {error && <div className="error-message">{error}</div>}
