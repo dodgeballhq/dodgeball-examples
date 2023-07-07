@@ -120,7 +120,11 @@ export default function App() {
         onError: async (error) => {
           setStatus("ERROR");
           // If there was an error performing the verification, display it
-          setError(error); // Usage Note: If the user cancels the verification, error.errorType = "CANCELLED"
+          if (error?.hasOwnProperty("details")) {
+            setError(error.details); // Usage Note: If the user cancels the verification, error.errorType = "CANCELLED"
+          } else {
+            setError(error);
+          }
           setIsSubmittingCheckpoint(false);
         },
       });
