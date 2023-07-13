@@ -15,6 +15,7 @@ export default function App() {
     {
       apiUrl: process.env.REACT_APP_DODGEBALL_API_URL,
       apiVersion: DodgeballApiVersion.v1,
+      logLevel: "TRACE" as any,
     }
   ); // Once initialized, you can omit the public API key
 
@@ -118,6 +119,7 @@ export default function App() {
           setIsSubmittingCheckpoint(false);
         },
         onError: async (error) => {
+          console.log("ON ERROR CALLED", error);
           setStatus("ERROR");
           // If there was an error performing the verification, display it
           if (error?.hasOwnProperty("details")) {
