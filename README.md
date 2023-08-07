@@ -103,7 +103,30 @@ dotnet build
 
 Now that you've got the server configured and started, try modifying it!
 
+### PHP
 
+The PHP examples are contained in the `server/php/protected-service` folder. To start the PHP example server, do the following:
+
+1. Copy the `.env.example` file's contents into a new `.env` file. Paste your `DODGEBALL_PRIVATE_API_KEY` into your new `.env` file. Your `.env` should look like this:
+
+```
+DODGEBALL_PRIVATE_API_KEY="whatever-your-private-key-is"
+DODGEBALL_API_URL="https://api.sandbox.dodgeballhq.com" # (Optional) set this to make calls to a Sandbox environment
+
+# Lots of other settings...
+```
+
+2. Run the following commands:
+
+```
+cd server/php/protected-service
+composer update
+php artisan serve
+```
+
+This will spin up a simple Laravel HTTP server listening on port 3020.
+
+Now that you've got the server configured and started, try modifying it!
 
 ## Client-Side Examples
 
