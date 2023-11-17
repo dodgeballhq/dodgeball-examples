@@ -52,8 +52,23 @@ export default function App() {
       When you know the ID of the currently logged-in user, 
       pass it along with a session ID to dodgeball.track():
     */
-    dodgeball.track(currentSessionId, currentUser?.id);
-  }, [currentUser?.id, currentSessionId]);
+    if (selectedUserType === "SPECIFIC") {
+      if (selectedSessionType === "SPECIFIC") {
+        if (specificUserId && specificSessionId) {
+          dodgeball.track(specificSessionId, specificUserId);
+        }
+      }
+    } else {
+      dodgeball.track(currentSessionId, currentUser?.id);
+    }
+  }, [
+    currentUser?.id,
+    currentSessionId,
+    selectedUserType,
+    selectedSessionType,
+    specificUserId,
+    specificSessionId,
+  ]);
 
   const hasPayloadError = useMemo(() => {
     try {
@@ -65,13 +80,39 @@ export default function App() {
   }, [payloadValue]);
 
   const canSubmitCheckpoint = useMemo(() => {
-    return (
-      !hasPayloadError &&
-      checkpointName?.length >= 3 &&
-      payloadValue?.length > 0 &&
-      currentSessionId
-    );
-  }, [checkpointName, payloadValue, hasPayloadError, currentSessionId]);
+    if (
+      hasPayloadError ||
+      checkpointName?.length < 3 ||
+      payloadValue?.length < 1
+    ) {
+      return false;
+    }
+
+    if (selectedUserType === "SPECIFIC") {
+      if (!specificUserId) {
+        return false;
+      }
+
+      if (selectedSessionType === "SPECIFIC") {
+        if (!specificSessionId) {
+          return false;
+        }
+      }
+
+      return true;
+    } else {
+      return currentSessionId != null && currentSessionId.length > 0;
+    }
+  }, [
+    checkpointName,
+    payloadValue,
+    hasPayloadError,
+    currentSessionId,
+    selectedUserType,
+    specificUserId,
+    specificSessionId,
+    selectedSessionType,
+  ]);
 
   const submitCheckpoint = async (
     userId: string | null,
