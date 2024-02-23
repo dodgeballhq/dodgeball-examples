@@ -70,6 +70,24 @@ app.post('/checkpoint', async (req, res) => {
   }
 });
 
+app.post('/event', async (req, res) => {
+  console.log('SEND SERVER EVENT', req.body);
+  // Send an event to Dodgeball to be logged and analyzed
+
+  await dodgeball.event({
+    sourceToken: req.body.sourceToken, // Obtained from the Dodgeball Client SDK, represents the device making the request
+    sessionId: req.body.sessionId,
+    userId: req.body.userId,
+    event: {
+      type: req.body.eventName,
+      data: req.body.payload,
+      eventTime: Date.now(),
+    },
+  });
+
+  return res.status(200).json({ success: true });
+});
+
 app.listen(APP_PORT, () => {
   console.log(`Listening on port ${APP_PORT}`);
 });

@@ -18,6 +18,9 @@ export default function App() {
       logLevel: "TRACE" as any,
     }
   ); // Once initialized, you can omit the public API key
+  const [activeTab, setActiveTab] = useState<"CHECKPOINT" | "SERVER_EVENT">(
+    "CHECKPOINT"
+  );
 
   const [selectedUserType, setSelectedUserType] = useState<
     "SELECT" | "SPECIFIC" | "ANONYMOUS"
@@ -35,10 +38,17 @@ export default function App() {
   const [payloadValue, setPayloadValue] = useState<string>(
     JSON.stringify(JSON.parse('{"example": "payload"}'), null, 2)
   );
+
+  const [eventName, setEventName] = useState<string>("");
+  const [eventPayloadValue, setEventPayloadValue] = useState<string>(
+    JSON.stringify(JSON.parse('{"example": "payload"}'), null, 2)
+  );
+
   const [anonymousSessions, setAnonymousSessions] = useState<string[]>([]);
   const [specificSessions, setSpecificSessions] = useState<string[]>([]);
 
   const [isSubmittingCheckpoint, setIsSubmittingCheckpoint] = useState(false);
+  const [isSubmittingServerEvent, setIsSubmittingServerEvent] = useState(false);
   const [isCheckpointSubmitted, setIsCheckpointSubmitted] = useState(false);
   const [status, setStatus] = useState<string | null>(null);
   const [error, setError] = useState<any>(null);
@@ -79,6 +89,15 @@ export default function App() {
     }
   }, [payloadValue]);
 
+  const hasEventPayloadError = useMemo(() => {
+    try {
+      JSON.stringify(JSON.parse(eventPayloadValue), null, 2);
+      return false;
+    } catch (e) {
+      return true;
+    }
+  }, [eventPayloadValue]);
+
   const canSubmitCheckpoint = useMemo(() => {
     if (
       hasPayloadError ||
@@ -113,6 +132,49 @@ export default function App() {
     specificSessionId,
     selectedSessionType,
   ]);
+
+  const canSubmitServerEvent = useMemo(() => {
+    if (
+      hasEventPayloadError ||
+      eventName?.length < 3 ||
+      eventPayloadValue?.length < 1
+    ) {
+      return false;
+    }
+
+    if (selectedUserType === "SPECIFIC") {
+      if (!specificUserId) {
+        return false;
+      }
+
+      if (selectedSessionType === "SPECIFIC") {
+        if (!specificSessionId) {
+          return false;
+        }
+      }
+
+      return true;
+    } else {
+      return currentSessionId != null && currentSessionId.length > 0;
+    }
+  }, [
+    eventName,
+    eventPayloadValue,
+    hasEventPayloadError,
+    currentSessionId,
+    selectedUserType,
+    specificUserId,
+    specificSessionId,
+    selectedSessionType,
+  ]);
+
+  const isCallCheckpointSelected = useMemo(() => {
+    return activeTab === "CHECKPOINT";
+  }, [activeTab]);
+
+  const isSendServerEventSelected = useMemo(() => {
+    return activeTab === "SERVER_EVENT";
+  }, [activeTab]);
 
   const submitCheckpoint = async (
     userId: string | null,
@@ -191,6 +253,44 @@ export default function App() {
 
     setIsSubmittingCheckpoint(true);
     await submitCheckpoint(userId, sessionId);
+  };
+
+  const submitServerEvent = async (
+    userId: string | null,
+    sessionId: string
+  ) => {
+    setError(null);
+    const sourceToken = await dodgeball.getSourceToken();
+    try {
+      const endpointResponse = await axios.post("http://localhost:3020/event", {
+        payload: JSON.parse(eventPayloadValue),
+        sessionId: sessionId,
+        userId: userId,
+        eventName: eventName,
+        sourceToken: sourceToken,
+      });
+      console.log("ENDPOINT RESPONSE", endpointResponse);
+      setIsSubmittingServerEvent(false);
+    } catch (error: any) {
+      setError(error?.message);
+      setIsSubmittingCheckpoint(false);
+    }
+  };
+
+  const onSendServerEventClick = async () => {
+    let userId = currentUser?.id ?? null;
+    let sessionId = currentSessionId;
+
+    if (selectedUserType === "SPECIFIC") {
+      userId = specificUserId;
+    }
+
+    if (selectedSessionType === "SPECIFIC") {
+      sessionId = specificSessionId;
+    }
+
+    setIsSubmittingServerEvent(true);
+    await submitServerEvent(userId, sessionId);
   };
 
   const selectSessionId = (
@@ -320,10 +420,21 @@ export default function App() {
     setPayloadValue(formattedPayload);
   };
 
+  const formatEventPayload = () => {
+    let formattedPayload = eventPayloadValue;
+
+    try {
+      let parsedPayload = JSON.parse(eventPayloadValue);
+      formattedPayload = JSON.stringify(parsedPayload, null, 2);
+    } catch (e) {}
+
+    setEventPayloadValue(formattedPayload);
+  };
+
   return (
     <div>
       <div className="header-container">
-        <h2>Call a Checkpoint</h2>
+        {/* <h2>Call a Checkpoint</h2> */}
         <p>
           This example is built using the Dodgeball Client SDK. You can use it
           to call checkpoints on your Dodgeball account and pass in arbitrary
@@ -332,42 +443,104 @@ export default function App() {
       </div>
       <div className="container">
         <div className="left-column">
-          <div className="field-group">
-            <div className="field-label">
-              <label htmlFor="checkpoint-name">Checkpoint Name</label>
+          <div className="tabs-container">
+            <div
+              className={`tab ${
+                isCallCheckpointSelected ? "tab-active" : "tab-inactive"
+              }`}
+              onClick={() => setActiveTab("CHECKPOINT")}
+            >
+              Call a Checkpoint
             </div>
-            <input
-              className="field-checkpoint-name-input"
-              name="checkpoint-name"
-              type="text"
-              placeholder="e.g. PAYMENT"
-              value={checkpointName}
-              onChange={(e) =>
-                setCheckpointName(
-                  e.target.value?.toUpperCase()?.replace(/ /g, "_")
-                )
-              }
-            />
+            <div
+              className={`tab ${
+                isSendServerEventSelected ? "tab-active" : "tab-inactive"
+              }`}
+              onClick={() => setActiveTab("SERVER_EVENT")}
+            >
+              Send a Server Event
+            </div>
           </div>
-          <div className="field-group">
-            <div className="field-label">
-              <label htmlFor="checkpoint-payload">Checkpoint Payload</label>
-            </div>
-            <textarea
-              className="payload-input"
-              name="checkpoint-payload"
-              value={payloadValue}
-              onChange={(e) => setPayloadValue(e.target.value)}
-              onBlur={formatPayload}
-              rows={4}
-              cols={20}
-            />
-            {hasPayloadError && (
-              <div className="error-message">
-                Make sure you enter valid JSON.
+          {isCallCheckpointSelected && (
+            <>
+              <div className="field-group">
+                <div className="field-label">
+                  <label htmlFor="checkpoint-name">Checkpoint Name</label>
+                </div>
+                <input
+                  className="field-checkpoint-name-input"
+                  name="checkpoint-name"
+                  type="text"
+                  placeholder="e.g. PAYMENT"
+                  value={checkpointName}
+                  onChange={(e) =>
+                    setCheckpointName(
+                      e.target.value?.toUpperCase()?.replace(/ /g, "_")
+                    )
+                  }
+                />
               </div>
-            )}
-          </div>
+              <div className="field-group">
+                <div className="field-label">
+                  <label htmlFor="checkpoint-payload">Checkpoint Payload</label>
+                </div>
+                <textarea
+                  className="payload-input"
+                  name="checkpoint-payload"
+                  value={payloadValue}
+                  onChange={(e) => setPayloadValue(e.target.value)}
+                  onBlur={formatPayload}
+                  rows={4}
+                  cols={20}
+                />
+                {hasPayloadError && (
+                  <div className="error-message">
+                    Make sure you enter valid JSON.
+                  </div>
+                )}
+              </div>
+            </>
+          )}
+          {isSendServerEventSelected && (
+            <>
+              <div className="field-group">
+                <div className="field-label">
+                  <label htmlFor="event-name">Event Name</label>
+                </div>
+                <input
+                  className="field-event-name-input"
+                  name="event-name"
+                  type="text"
+                  placeholder="e.g. LOGIN_FAILED"
+                  value={eventName}
+                  onChange={(e) =>
+                    setEventName(
+                      e.target.value?.toUpperCase()?.replace(/ /g, "_")
+                    )
+                  }
+                />
+              </div>
+              <div className="field-group">
+                <div className="field-label">
+                  <label htmlFor="event-payload">Event Payload</label>
+                </div>
+                <textarea
+                  className="payload-input"
+                  name="event-payload"
+                  value={eventPayloadValue}
+                  onChange={(e) => setEventPayloadValue(e.target.value)}
+                  onBlur={formatEventPayload}
+                  rows={4}
+                  cols={20}
+                />
+                {hasEventPayloadError && (
+                  <div className="error-message">
+                    Make sure you enter valid JSON.
+                  </div>
+                )}
+              </div>
+            </>
+          )}
         </div>
         <div className="right-column">
           <div>
@@ -560,19 +733,31 @@ export default function App() {
         </div>
       </div>
       <div className="submit-button-container">
-        <button
-          onClick={onCallCheckpointClick}
-          disabled={isSubmittingCheckpoint || !canSubmitCheckpoint}
-        >
-          {isSubmittingCheckpoint ? "Submitting..." : "Call Checkpoint"}
-        </button>
-        {status && (
-          <div className="checkpoint-status">
-            Latest Checkpoint Response:
-            <pre className="checkpoint-response-box">{status}</pre>
-          </div>
+        {isCallCheckpointSelected && (
+          <>
+            <button
+              onClick={onCallCheckpointClick}
+              disabled={isSubmittingCheckpoint || !canSubmitCheckpoint}
+            >
+              {isSubmittingCheckpoint ? "Submitting..." : "Call Checkpoint"}
+            </button>
+            {status && (
+              <div className="checkpoint-status">
+                Latest Checkpoint Response:
+                <pre className="checkpoint-response-box">{status}</pre>
+              </div>
+            )}
+            {error && <div className="error-message">{error}</div>}
+          </>
         )}
-        {error && <div className="error-message">{error}</div>}
+        {isSendServerEventSelected && (
+          <button
+            onClick={onSendServerEventClick}
+            disabled={isSubmittingServerEvent || !canSubmitServerEvent}
+          >
+            {isSubmittingServerEvent ? "Submitting..." : "Send Server Event"}
+          </button>
+        )}
       </div>
     </div>
   );
