@@ -70,14 +70,13 @@ func processCheckpoint(requestContext *gin.Context) {
 		return
 	}
 
+	checkpointOptions := dodgeball.CheckpointResponseOptions{}
 	timeoutString := os.Getenv("CHECKPOINT_TIMEOUT")
-	if timeoutString == "" {
-		timeoutString = "100"
-	}
-
-	timeout, err := strconv.Atoi(timeoutString)
-	if err != nil {
-		timeout = 100
+	if timeoutString != "" {
+		timeout, err := strconv.Atoi(timeoutString)
+		if err != nil {
+			checkpointOptions.Timeout = timeout
+		}
 	}
 
 	var checkpointRequest = dodgeball.CheckpointRequest{
@@ -90,9 +89,7 @@ func processCheckpoint(requestContext *gin.Context) {
 		UserID:            postRequest.UserId,
 		SessionID:         postRequest.SessionId,
 		UseVerificationID: postRequest.VerificationId,
-		Options: dodgeball.CheckpointResponseOptions{
-			Timeout: timeout,
-		},
+		Options:           checkpointOptions,
 	}
 
 	var dbConfig = dodgeball.NewConfig()
