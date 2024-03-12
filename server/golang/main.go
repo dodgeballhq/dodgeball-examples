@@ -11,7 +11,6 @@ import (
 	"net/http"
 	"os"
 	"strconv"
-	"time"
 )
 
 type CheckpointRequest struct {
@@ -153,9 +152,6 @@ func processCheckpoint(requestContext *gin.Context) {
 }
 
 func main() {
-	var fucked = time.Second
-	fmt.Print(fucked)
-
 	err := godotenv.Load(".env")
 	if err != nil {
 		log.Fatalf("Some error occured. Err: %s", err)
