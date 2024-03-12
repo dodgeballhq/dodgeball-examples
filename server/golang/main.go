@@ -74,7 +74,7 @@ func processCheckpoint(requestContext *gin.Context) {
 	timeoutString := os.Getenv("CHECKPOINT_TIMEOUT")
 	if timeoutString != "" {
 		timeout, err := strconv.Atoi(timeoutString)
-		if err != nil {
+		if err == nil {
 			checkpointOptions.Timeout = timeout
 		}
 	}
