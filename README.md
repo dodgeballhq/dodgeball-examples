@@ -11,7 +11,7 @@ To orchestrate and protect the full user-journey, Dodgeball offers SDKs for both
 The `client` folder contains all client-side examples (i.e. code that runs on the customer's device):
 
 - [Web (React)](#web-react)
-- [Web (Typescript)](#web-typescript)
+- [Web (Typescript)](#web-vite-typescript)
 
 The `server` folder contains all server-side examples:
 
@@ -208,13 +208,13 @@ This will start a simple React app that allows you to easily call checkpoints an
 
 ### Web (Typescript)
 
-The Web example is found in `client/web-typescript` and can be started by following these steps:
+The Web example is found in `client/web-vite-typescript` and can be started by following these steps:
 
 1. Copy the `.env.example` file's contents into a new `.env` file. Enter your configuration details in the `.env` file.
 2. Run these commands:
 
 ``` #bash
-cd client/web-typescript
+cd client/web-vite-typescript
 npm install
 npm start
 ```
