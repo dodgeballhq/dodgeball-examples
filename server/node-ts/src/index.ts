@@ -11,6 +11,7 @@ app.options("*", cors());
 const port = process.env.PORT || 3020;
 
 import { Dodgeball, DodgeballApiVersion } from "@dodgeball/trust-sdk-server";
+import { ICheckpointOptions } from "@dodgeball/trust-sdk-server/dist/types/types";
 import {
   IExecuteDodgeballCheckpointParams,
   IProcessDodgeballCheckpointApiParams,
@@ -19,7 +20,7 @@ import {
   IProcessDodgeballServerEventResult,
 } from "./interfaces";
 import { getIp } from "./helpers";
-import { ICheckpointOptions } from "@dodgeball/trust-sdk-server/dist/types/types";
+
 
 // Initialize the SDK with your secret API key.
 const dodgeball = new Dodgeball(process.env.DODGEBALL_PRIVATE_API_KEY ?? "UNSET_PRIVATE_API_KEY", {
