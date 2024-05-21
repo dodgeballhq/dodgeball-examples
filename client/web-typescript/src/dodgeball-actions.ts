@@ -1,3 +1,4 @@
+import { IVerification } from "@dodgeball/trust-sdk-client/dist/types/types";
 import globalState from "./state";
 
 export interface IProcessDodgeballServerEventApiParams {
@@ -25,7 +26,7 @@ export interface IProcessDodgeballServerEventResult {
 // These are very simple ways to handle the event submission
 // You can add more complex logic here if desired
 const onFailDodgeballSubmitEvent = () => {
-  globalState.addMessage("onFailDodgeballSubmitEvent called", "green");
+  globalState.addMessage("onFailDodgeballSubmitEvent called", "red");
 };
 
 const onSuccessDodgeballSubmitEvent = () => {
@@ -96,7 +97,7 @@ interface IProcessDodgeballCheckpointResult {
   // The verification object returned from the checkpoint
   // This contains information about the verification
   // that should be sent to the frontend for handling
-  verification: unknown;
+  verification: IVerification | null;
   // An error message if the checkpoint failed
   errorMessage?: string;
 }
@@ -150,9 +151,15 @@ export const processCheckpoint = async (
     const endpointResponse = await fetch("http://localhost:3020/checkpoint", fetchConfig);
     const responseData: IProcessDodgeballCheckpointResult = await endpointResponse.json();
 
-    dodgeball.handleVerification(responseData.verification as any, {
+    const verification = responseData.verification;
+    if (!verification) {
+      throw new Error("No verification object returned from the endpoint");
+    }
+
+    dodgeball.handleVerification(verification, {
       onVerified: async (verification) => {
         // Call recursively if an additional step is required
+        globalState.addMessage(`Checkpoint verification ${verification.id} received, processing next step`);
         await processCheckpoint(apiParams, verification.id);
       },
       onApproved: async () => {

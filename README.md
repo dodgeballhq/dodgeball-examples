@@ -15,7 +15,7 @@ The `client` folder contains all client-side examples (i.e. code that runs on th
 
 The `server` folder contains all server-side examples:
 
-- [NodeJS](#nodejs)
+- [node-js](#node-js)
 - [Python](#python)
 - [.NET](#.NET)
 - [Golang](#golang)
@@ -28,11 +28,11 @@ Fantastic, now you're ready to experiment with Dodgeball! Follow the instruction
 
 ## Server-Side Examples
 
-### NodeJS
+### node-js
 
-The NodeJS examples are contained in the `server/nodejs` folder. To start the NodeJS example server, do the following:
+The node-js examples are contained in the `server/node-js` folder. To start the node-js example server, do the following:
 
-1. Paste your `DODGEBALL_PRIVATE_API_KEY` into a new file: `server/nodejs/.env`. Your `.env` should look like this:
+1. Paste your `DODGEBALL_PRIVATE_API_KEY` into a new file: `server/node-js/.env`. Your `.env` should look like this:
 
 ``` #.env
 DODGEBALL_PRIVATE_API_KEY="whatever-your-private-key-is"
@@ -42,7 +42,7 @@ DODGEBALL_API_URL="https://api.sandbox.dodgeballhq.com" # (Optional) set this to
 2. Run the following commands:
 
 ``` #bash
-cd server/nodejs
+cd server/node-js
 npm install
 npm start
 ```
