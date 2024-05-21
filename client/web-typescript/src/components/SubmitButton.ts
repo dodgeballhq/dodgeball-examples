@@ -1,6 +1,6 @@
 import {
-  IProcessCheckpointApiParams,
-  IProcessServerEventApiParams,
+  IProcessDodgeballCheckpointApiParams,
+  IProcessDodgeballServerEventApiParams,
   processCheckpoint,
   sendServerEvent,
 } from "../dodgeball-actions";
@@ -25,7 +25,7 @@ export function setupSubmitButton() {
     globalState.clearMessages();
     const checkpointName = globalState.getCheckpointName();
     globalState.addMessage("processCheckpoint called for checkpoint: " + checkpointName);
-    const processCheckpointApiParams: IProcessCheckpointApiParams = {
+    const processCheckpointApiParams: IProcessDodgeballCheckpointApiParams = {
       checkpointName,
       payload: globalState.getCheckpointPayload(),
       sessionId: globalState.getSessionId() ?? undefined,
@@ -38,7 +38,7 @@ export function setupSubmitButton() {
     globalState.clearMessages();
     const serverEventName = globalState.getServerEventName();
     globalState.addMessage("sendServerEvent called for event: " + serverEventName);
-    const processServerEventApiParams: IProcessServerEventApiParams = {
+    const processServerEventApiParams: IProcessDodgeballServerEventApiParams = {
       eventName: serverEventName,
       payload: globalState.getServerEventPayload(),
       sessionId: globalState.getSessionId() ?? undefined,
