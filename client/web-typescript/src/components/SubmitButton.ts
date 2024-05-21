@@ -1,4 +1,9 @@
-import { IProcessCheckpointApiParams, IProcessServerEventApiParams, processCheckpoint, sendServerEvent } from "../dodgeball-actions";
+import {
+  IProcessCheckpointApiParams,
+  IProcessServerEventApiParams,
+  processCheckpoint,
+  sendServerEvent,
+} from "../dodgeball-actions";
 import globalState from "../state";
 
 export function createSubmitButton(): string {
@@ -9,12 +14,12 @@ export function createSubmitButton(): string {
 }
 
 export function setupSubmitButton() {
-  const submitButton = document.getElementById('submit') as HTMLButtonElement;
-  const submitButtonMessages = document.querySelector('.submit-button-messages') as HTMLDivElement;
+  const submitButton = document.getElementById("submit") as HTMLButtonElement;
+  const submitButtonMessages = document.querySelector(".submit-button-messages") as HTMLDivElement;
 
   const getCorrectInnerText = (action: string) => {
     return action === "checkpoint" ? "Call Checkpoint" : "Send Server Event";
-  }
+  };
 
   const submitCheckpoint = async () => {
     globalState.clearMessages();
@@ -25,9 +30,9 @@ export function setupSubmitButton() {
       payload: globalState.getCheckpointPayload(),
       sessionId: globalState.getSessionId() ?? undefined,
       userId: globalState.getUserId() ?? undefined,
-    }
+    };
     await processCheckpoint(processCheckpointApiParams);
-  }
+  };
 
   const submitEvent = async () => {
     globalState.clearMessages();
@@ -38,14 +43,14 @@ export function setupSubmitButton() {
       payload: globalState.getServerEventPayload(),
       sessionId: globalState.getSessionId() ?? undefined,
       userId: globalState.getUserId() ?? undefined,
-    }
-    await sendServerEvent(processServerEventApiParams)
-  }
+    };
+    await sendServerEvent(processServerEventApiParams);
+  };
 
   if (submitButton) {
     const action = globalState.getSubmitButtonAction();
     submitButton.innerText = getCorrectInnerText(action);
-    submitButton.addEventListener('click', async () => {
+    submitButton.addEventListener("click", async () => {
       const action = globalState.getSubmitButtonAction();
       switch (action) {
         case "checkpoint":
@@ -59,7 +64,8 @@ export function setupSubmitButton() {
   }
 
   const updateView = () => {
-    const { dodgeball, sessionId, checkpointPayloadIsValid, serverEventPayloadIsValid, submitButtonAction } = globalState.getState();
+    const { dodgeball, sessionId, checkpointPayloadIsValid, serverEventPayloadIsValid, submitButtonAction } =
+      globalState.getState();
     submitButton.innerText = getCorrectInnerText(submitButtonAction);
     const issues = [];
     if (!dodgeball) {
@@ -81,7 +87,7 @@ export function setupSubmitButton() {
       if (submitButtonMessages) submitButtonMessages.innerHTML = "";
       submitButton.disabled = false;
     }
-  }
+  };
 
   updateView();
 

@@ -84,10 +84,11 @@ export const setupCreateEventOrCheckpointForm = () => {
       nameInput.value = action === "checkpoint" ? globalState.getCheckpointName() : globalState.getServerEventName();
     }
     if (payloadInput && payloadInput instanceof HTMLTextAreaElement) {
-      payloadInput.value =
-        action === "checkpoint"
-          ? JSON.stringify(globalState.getCheckpointPayload(), null, 2)
-          : JSON.stringify(globalState.getServerEventPayload(), null, 2);
+      if (action === "checkpoint" && globalState.getCheckpointPayloadIsValid()) {
+        payloadInput.value = JSON.stringify(globalState.getCheckpointPayload(), null, 2);
+      } else if (action === "event" && globalState.getServerEventPayloadIsValid()) {
+        payloadInput.value = JSON.stringify(globalState.getServerEventPayload(), null, 2);
+      }
     }
   };
 

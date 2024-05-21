@@ -129,6 +129,10 @@ class GlobalState {
     return this.getState().checkpointPayload;
   }
 
+  public getCheckpointPayloadIsValid() {
+    return this.getState().checkpointPayloadIsValid;
+  }
+
   public setCheckpointPayload(rawCheckpointPayload: string) {
     try {
       const parsedPayload = JSON.parse(rawCheckpointPayload);
@@ -149,6 +153,10 @@ class GlobalState {
 
   public getServerEventPayload() {
     return this.getState().serverEventPayload;
+  }
+
+  public getServerEventPayloadIsValid() {
+    return this.getState().serverEventPayloadIsValid;
   }
 
   public setServerEventPayload(rawServerEventPayload: string) {

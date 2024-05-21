@@ -112,7 +112,8 @@ button {
   border-bottom: 2px solid #2277cc;
 }
 
-.left-column, .right-column {
+.left-column,
+.right-column {
   display: flex;
   flex-direction: column;
   justify-content: start;
