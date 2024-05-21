@@ -60,9 +60,11 @@ class GlobalState {
 
   public setDodgeball(dodgeball: Dodgeball) {
     this.setState({ dodgeball });
+    this.addMessage("Dodgeball initialized");
     const { sessionId, userId } = this.state;
     if (sessionId) {
       dodgeball.track(sessionId, userId ?? undefined);
+      this.addMessage(`Dodgeball tracking session/user (${sessionId}/${userId})`, "green");
     }
   }
 
@@ -83,20 +85,13 @@ class GlobalState {
     this.setState({ sessionId, userId });
     if (dodgeball && sessionId) {
       dodgeball.track(sessionId, userId ?? undefined);
+      this.addMessage(`Dodgeball tracking session/user (${sessionId}/${userId})`, "green");
     }
   }
 
   public getSubmitButtonAction() {
     const { submitButtonAction } = this.getState();
     return submitButtonAction;
-  }
-
-  public submitEvent() {
-    const dodgeball = this.getDodgeball();
-    const sessionId = this.getSessionId();
-    const userId = this.getUserId();
-    if (!dodgeball || !sessionId) return;
-    dodgeball.track(sessionId, userId ?? undefined);
   }
 
   public addMessage(message: string, color?: string) {
