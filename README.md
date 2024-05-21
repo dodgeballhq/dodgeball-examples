@@ -16,6 +16,7 @@ The `client` folder contains all client-side examples (i.e. code that runs on th
 The `server` folder contains all server-side examples:
 
 - [node-js](#node-js)
+- [node-ts](#node-ts)
 - [Python](#python)
 - [.NET](#.NET)
 - [Golang](#golang)
@@ -43,6 +44,22 @@ DODGEBALL_API_URL="https://api.sandbox.dodgeballhq.com" # (Optional) set this to
 
 ``` #bash
 cd server/node-js
+npm install
+npm start
+```
+
+This will spin up a simple express HTTP server listening on port 3020.
+
+Now that you've got the server configured and started, try modifying it!
+
+### node-ts
+
+1. Copy the `.env.example` file's contents into a new `.env` file. Enter your configuration details in the `.env` file.
+
+2. Run the following commands:
+
+``` #bash
+cd server/node-ts
 npm install
 npm start
 ```
