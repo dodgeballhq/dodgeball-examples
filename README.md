@@ -1,21 +1,26 @@
 # dodgeball-examples
 
 ## Purpose
+
 This repository contains simple example applications to get you started with Dodgeball.
 
 ## How to Use
+
 To orchestrate and protect the full user-journey, Dodgeball offers SDKs for both the server and client side.
 
 The `client` folder contains all client-side examples (i.e. code that runs on the customer's device):
-- [Web (Javascript)](#web-javascript)
+
+- [Web (React)](#web-react)
+- [Web (Typescript)](#web-typescript)
 
 The `server` folder contains all server-side examples:
+
 - [NodeJS](#nodejs)
 - [Python](#python)
-- [.NET](#dotnet)
-- [Golang] (#golang)
+- [.NET](#.NET)
+- [Golang](#golang)
 
-You should use these examples along with the [official Dodgeball documentation](https://docs.dodgeballhq.com) to experiment with your Dodgeball account. You will need a [free Dodgeball account](https://app.dodgeballhq.com/signup) to run these examples. 
+You should use these examples along with the [official Dodgeball documentation](https://docs.dodgeballhq.com) to experiment with your Dodgeball account. You will need a [free Dodgeball account](https://app.dodgeballhq.com/signup) to run these examples.
 
 Once you have an account, login, visit the **Checkpoint Studio**, then create a new checkpoint called `PAYMENT`. Open the **Step Palette**, then drag and drop an *Allow* step into your checkpoint. Drag an arrow from the *PAYMENT* step to the *Allow* step to connect them. Then click the **Publish** button in the top-right of your screen.
 
@@ -29,14 +34,14 @@ The NodeJS examples are contained in the `server/nodejs` folder. To start the No
 
 1. Paste your `DODGEBALL_PRIVATE_API_KEY` into a new file: `server/nodejs/.env`. Your `.env` should look like this:
 
-```
+``` #.env
 DODGEBALL_PRIVATE_API_KEY="whatever-your-private-key-is"
 DODGEBALL_API_URL="https://api.sandbox.dodgeballhq.com" # (Optional) set this to make calls to a Sandbox environment
 ```
 
 2. Run the following commands:
 
-```
+``` #bash
 cd server/nodejs
 npm install
 npm start
@@ -52,23 +57,23 @@ The Python examples are contained in the `server/python` folder. To start the Py
 
 1. Paste your `DODGEBALL_PRIVATE_API_KEY` into a new file: `server/python/protected-service/.env`. Your `.env` should look like this:
 
-```
+``` #.env
 DODGEBALL_PRIVATE_API_KEY="whatever-your-private-key-is"
 DODGEBALL_API_URL="https://api.sandbox.dodgeballhq.com" 
 ```
 
-2.  Make sure you have poetry installed on your local machine.  If not, install it following the instructions at: https://python-poetry.org/docs/
-
+2. Make sure you have poetry installed on your local machine.  If not, install it following the instructions at: <https://python-poetry.org/docs/>
 
 3. To initialize the poetry infrastructure, execute once:
-```
+
+``` #bash
 cd server/python/protected-service
 poetry init
 ```
 
 4. To execute the python server example, execute (in the same directory):
 
-```
+``` #bash
 poetry shell
 python protected_service/protected_main.py
 ```
@@ -83,7 +88,7 @@ The .NET examples are contained in the `server/dotnet` folder. To start the .NET
 
 1. Paste your `DODGEBALL_PRIVATE_API_KEY` into a new file: `server/dotnet/ProtectedService/.env`. Your `.env` should look like this:
 
-```
+``` #.env
 DODGEBALL_PRIVATE_API_KEY="whatever-your-private-key-is"
 DODGEBALL_API_URL="https://api.sandbox.dodgeballhq.com" 
 ```
@@ -92,13 +97,14 @@ DODGEBALL_API_URL="https://api.sandbox.dodgeballhq.com"
 
 3. Change directory to ProtectedService and build to validate that all packages are installed
 
-```
+``` #bash
 cd ProtectedService
 dotnet build
 ```
 
 4. Now run your server by executing:
-```
+
+``` #bash
   dotnet run
 ```
 
@@ -110,7 +116,7 @@ The Golang examples are contained in the `server/golang` folder. To start the Go
 
 1. Paste your `DODGEBALL_PRIVATE_API_KEY` into a new file: `server/golang/.env`. Your `.env` should look like this:
 
-```
+``` #.env
 DODGEBALL_PRIVATE_API_KEY="whatever-your-private-key-is"
 DODGEBALL_API_URL="https://api.sandbox.dodgeballhq.com" 
 
@@ -122,14 +128,14 @@ CHECKPOINT_TIMEOUT=100
 
 3. Change directory to Golang and build to validate that all packages are installed
 
-```
+``` #bash
 cd golang
-
 go mod download
 ```
 
 4. Now run your server by executing:
-```
+
+``` #bash
   go run .
 ```
 
@@ -141,7 +147,7 @@ The PHP examples are contained in the `server/php/protected-service` folder. To 
 
 1. Copy the `.env.example` file's contents into a new `.env` file. Paste your `DODGEBALL_PRIVATE_API_KEY` into your new `.env` file. Your `.env` should look like this:
 
-```
+``` #.env
 DODGEBALL_PRIVATE_API_KEY="whatever-your-private-key-is"
 DODGEBALL_API_URL="https://api.sandbox.dodgeballhq.com" # (Optional) set this to make calls to a Sandbox environment
 
@@ -150,7 +156,7 @@ DODGEBALL_API_URL="https://api.sandbox.dodgeballhq.com" # (Optional) set this to
 
 2. Run the following commands:
 
-```
+``` #bash
 cd server/php/protected-service
 composer update
 php artisan serve
@@ -162,23 +168,38 @@ Now that you've got the server configured and started, try modifying it!
 
 ## Client-Side Examples
 
-### Web (JavaScript)
+### Web (React)
 
-The Web example is found in `client/web` and can be started by following these steps:
+The Web example is found in `client/web-react` and can be started by following these steps:
 
 1. Paste your `DODGEBALL_PUBLIC_API_KEY` into a new file: `client/web/.env`. Your `.env` should look like this:
 
-```
+``` #.env
 REACT_APP_DODGEBALL_PUBLIC_API_KEY="whatever-your-public-key-is"
 REACT_APP_DODGEBALL_API_URL="https://api.sandbox.dodgeballhq.com" # (Optional) set this to make calls to a Sandbox environment
 ```
 
 2. Run these commands:
 
-```
-cd client/web
+``` #base
+cd client/web-react
 npm install
 npm start
 ```
 
 This will start a simple React app that allows you to easily call checkpoints and evaluate their responses. It is configured to send POST requests to a dodgeball-examples server listening to `http://localhost:3020/checkpoint`.
+
+### Web (Typescript)
+
+The Web example is found in `client/web-typescript` and can be started by following these steps:
+
+1. Copy the `.env.example` file's contents into a new `.env` file. Enter your configuration details in the `.env` file.
+2. Run these commands:
+
+``` #bash
+cd client/web-typescript
+npm install
+npm start
+```
+
+This will start a Vanilla Typescript Vite app that allows you to easily call checkpoints and evaluate their responses. It is configured to send POST requests to a dodgeball-examples server listening to `http://localhost:3020/checkpoint`.
