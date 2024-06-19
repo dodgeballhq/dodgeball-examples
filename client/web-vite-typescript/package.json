@@ -1,0 +1,21 @@
+{
+  "name": "my-vite-app",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "start": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "format": "prettier --write ."
+  },
+  "devDependencies": {
+    "typescript": "^5.2.2",
+    "vite": "^5.2.0"
+  },
+  "dependencies": {
+    "@dodgeball/trust-sdk-client": "^0.0.38",
+    "nanoid": "^5.0.7",
+    "prettier": "^3.2.5"
+  }
+}
