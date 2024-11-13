@@ -183,5 +183,5 @@ class GlobalDodgeballState {
   }
 }
 
-const globalState = new GlobalDodgeballState();
-export default globalState;
+const dodgeballGlobalState = new GlobalDodgeballState();
+export default dodgeballGlobalState;

@@ -1,15 +1,14 @@
 "use client";
-import { FC, useState } from "react";
+import { FC } from "react";
+import dodgeballGlobalState from "../helpers/state";
 
 export const CheckpointOrEventForm: FC = () => {
-  const [payload, setPayload] = useState('{"example": "payload"}');
-  const [checkpointName, setCheckpointName] = useState("");
   const handlePayloadChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setPayload(e.target.value);
+    dodgeballGlobalState.setCheckpointPayload(e.target.value);
   };
 
   const handleCheckpointNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setCheckpointName(e.target.value);
+    dodgeballGlobalState.setCheckpointName(e.target.value);
   };
 
   return (
@@ -20,11 +19,11 @@ export const CheckpointOrEventForm: FC = () => {
 </div>
       <div className="field-group">
         <div className="field-label"><label htmlFor="checkpoint-name">Checkpoint Name</label></div>
-        <input onChange={handleCheckpointNameChange} className="field-checkpoint-name-input" name="checkpoint-name" type="text" placeholder="e.g. PAYMENT" defaultValue="" />
+        <input onChange={handleCheckpointNameChange} className="field-checkpoint-name-input" name="checkpoint-name" type="text" placeholder="e.g. PAYMENT" defaultValue={dodgeballGlobalState.getCheckpointName()} />
       </div>
       <div className="field-group">
         <div className="field-label"><label htmlFor="checkpoint-payload">Checkpoint Payload</label></div>
-        <textarea onChange={handlePayloadChange} className="payload-input" name="checkpoint-payload" rows={4} cols={20} defaultValue={'{"example": "payload"}'}></textarea>
+        <textarea onChange={handlePayloadChange} className="payload-input" name="checkpoint-payload" rows={4} cols={20} defaultValue={JSON.stringify(dodgeballGlobalState.getCheckpointPayload())}></textarea>
       </div>
     </>
   );

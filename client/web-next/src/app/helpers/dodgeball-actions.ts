@@ -1,5 +1,5 @@
 import { IVerification } from "@dodgeball/trust-sdk-client/dist/types/types";
-import globalDodgeballState from "./state";
+import dodgeballGlobalState from "./state";
 
 export interface IProcessDodgeballServerEventApiParams {
   // Name of the event to be processed
@@ -26,15 +26,15 @@ export interface IProcessDodgeballServerEventResult {
 // These are very simple ways to handle the event submission
 // You can add more complex logic here if desired
 const onFailDodgeballSubmitEvent = () => {
-  globalDodgeballState.addMessage("onFailDodgeballSubmitEvent called", "red");
+  dodgeballGlobalState.addMessage("onFailDodgeballSubmitEvent called", "red");
 };
 
 const onSuccessDodgeballSubmitEvent = () => {
-  globalDodgeballState.addMessage("onSuccessDodgeballSubmitEvent called", "green");
+  dodgeballGlobalState.addMessage("onSuccessDodgeballSubmitEvent called", "green");
 };
 
 export const sendServerEvent = async (apiParams: IProcessDodgeballServerEventApiParams) => {
-  const dodgeball = globalDodgeballState.getDodgeball();
+  const dodgeball = dodgeballGlobalState.getDodgeball();
   if (!dodgeball) {
     throw new Error("Dodgeball SDK not initialized");
   }
@@ -106,17 +106,17 @@ interface IProcessDodgeballCheckpointResult {
 // You can add more complex logic here if desired
 const onCheckpointError = (verification: IVerification | null, message: string) => {
   console.log("onCheckpointError called", verification, message);
-  globalDodgeballState.addMessage("onCheckpointError called with message: " + JSON.stringify(message), "red");
+  dodgeballGlobalState.addMessage("onCheckpointError called with message: " + JSON.stringify(message), "red");
 };
 
 const onCheckpointApproved = (verification: IVerification) => {
   console.log("onCheckpointApproved called", verification);
-  globalDodgeballState.addMessage("onCheckpointApproved called", "green");
+  dodgeballGlobalState.addMessage("onCheckpointApproved called", "green");
 };
 
 const onCheckpointDenied = (verification: IVerification) => {
   console.log("onCheckpointDenied called", verification);
-  globalDodgeballState.addMessage("onCheckpointDenied called", "orange");
+  dodgeballGlobalState.addMessage("onCheckpointDenied called", "orange");
 };
 
 export const processCheckpoint = async (
@@ -125,7 +125,7 @@ export const processCheckpoint = async (
   previousVerificationId: string | null = null
 ) => {
   try {
-    const dodgeball = globalDodgeballState.getDodgeball();
+    const dodgeball = dodgeballGlobalState.getDodgeball();
     if (!dodgeball) {
       throw new Error("Dodgeball SDK not initialized");
     }
@@ -161,16 +161,16 @@ export const processCheckpoint = async (
 
     if (verification.stepData?.customMessage) {
       try {
-        globalDodgeballState.addMessage("Received custom message...\n" + JSON.stringify(JSON.parse(verification.stepData.customMessage), null, 2));
+        dodgeballGlobalState.addMessage("Received custom message...\n" + JSON.stringify(JSON.parse(verification.stepData.customMessage), null, 2));
       } catch (err) {
-        globalDodgeballState.addMessage("Received custom message...\n" + verification.stepData.customMessage);
+        dodgeballGlobalState.addMessage("Received custom message...\n" + verification.stepData.customMessage);
       }
     }
 
     dodgeball.handleVerification(verification, {
       onVerified: async (verification) => {
         // Call recursively if an additional step is required
-        globalDodgeballState.addMessage(`Checkpoint verification ${verification.id} received, processing next step`);
+        dodgeballGlobalState.addMessage(`Checkpoint verification ${verification.id} received, processing next step`);
         await processCheckpoint(apiParams, verification.id);
       },
       onApproved: async (verification) => {
