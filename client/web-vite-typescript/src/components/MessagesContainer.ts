@@ -15,10 +15,13 @@ export const setupMessagesContainer = () => {
   const updateView = () => {
     const messages = globalState.getMessages();
     if (messagesListElement) {
+      messagesListElement.style.maxHeight = "400px";
+      messagesListElement.style.overflowY = "auto";
       if (messagesListElement) messagesListElement.innerHTML = "";
       messages.forEach((message) => {
         const dateString = message.jsDate.toLocaleTimeString();
         const liElement = document.createElement("li");
+        liElement.style.whiteSpace = "pre-wrap";
         liElement.innerHTML = `${dateString}: ${message.message}`;
         liElement.style.color = message.color ?? "black";
         messagesListElement.appendChild(liElement);

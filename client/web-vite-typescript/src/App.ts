@@ -1,11 +1,11 @@
-import { createHeader } from "./components/Header";
 import { Dodgeball, DodgeballApiVersion } from "@dodgeball/trust-sdk-client";
+import { createEventOrCheckpointForm, setupCreateEventOrCheckpointForm } from "./components/EventOrCheckpointForm";
+import { createHeader } from "./components/Header";
+import { createMessagesContainer, setupMessagesContainer } from "./components/MessagesContainer";
+import { createStateViewer, setupStateViewer } from "./components/StateViewer";
+import { createSubmitButton, setupSubmitButton } from "./components/SubmitButton";
 import { createUserSelector, setupUserSelector } from "./components/UserSelector";
 import globalState from "./state";
-import { createSubmitButton, setupSubmitButton } from "./components/SubmitButton";
-import { createEventOrCheckpointForm, setupCreateEventOrCheckpointForm } from "./components/EventOrCheckpointForm";
-import { createStateViewer, setupStateViewer } from "./components/StateViewer";
-import { createMessagesContainer, setupMessagesContainer } from "./components/MessagesContainer";
 
 export function createApp() {
   const appDiv = document.querySelector<HTMLDivElement>("#app");
@@ -25,7 +25,7 @@ export function createApp() {
   if (!appDiv) return;
 
   appDiv.innerHTML = `
-    ${createHeader()}
+    ${createHeader({ apiUrl: dodgeballApiUrl })}
     <div class="container">
       <div class="left-column">
         ${createEventOrCheckpointForm()}

@@ -1,6 +1,6 @@
-import express, { Request, Response } from "express";
 import cors from "cors";
 import * as dotenv from "dotenv";
+import express, { Request, Response } from "express";
 dotenv.config();
 
 const app = express();
@@ -12,6 +12,7 @@ const port = process.env.PORT || 3020;
 
 import { Dodgeball, DodgeballApiVersion } from "@dodgeball/trust-sdk-server";
 import { ICheckpointOptions } from "@dodgeball/trust-sdk-server/dist/types/types";
+import { getIp } from "./helpers";
 import {
   IExecuteDodgeballCheckpointParams,
   IProcessDodgeballCheckpointApiParams,
@@ -19,7 +20,6 @@ import {
   IProcessDodgeballServerEventApiParams,
   IProcessDodgeballServerEventResult,
 } from "./interfaces";
-import { getIp } from "./helpers";
 
 
 // Initialize the SDK with your secret API key.
