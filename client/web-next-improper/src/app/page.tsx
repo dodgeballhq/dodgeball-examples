@@ -1,4 +1,3 @@
-"use client";
 import { Dodgeball, DodgeballApiVersion } from "@dodgeball/trust-sdk-client";
 // import { CheckpointOrEventForm } from "./components/checkpoint-or-event-form";
 // import { MessagesContainer } from "./components/messages-container";
@@ -17,6 +16,11 @@ export default function Home() {
     apiUrl: dodgeballApiUrl,
     apiVersion: DodgeballApiVersion.v1,
   });
+  if (dodgeball) {
+    console.log("apple2 - Dodgeball initialized");
+  } else {
+    console.log("apple2 - Dodgeball not initialized");
+  }
 
   // dodgeballGlobalState.setDodgeball(dodgeball);
   // return (
