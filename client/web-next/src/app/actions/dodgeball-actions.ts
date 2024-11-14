@@ -1,5 +1,6 @@
+import { Dodgeball } from "@dodgeball/trust-sdk-client";
 import { IVerification } from "@dodgeball/trust-sdk-client/dist/types/types";
-import { DodgeballState, DodgeballStateGetters, DodgeballStateSetters } from "../helpers/dodgeball-state";
+import { MessageColor } from "../contexts/CheckpointStateProvider";
 
 export interface IProcessDodgeballServerEventApiParams {
   // Name of the event to be processed
@@ -25,16 +26,15 @@ export interface IProcessDodgeballServerEventResult {
 
 // These are very simple ways to handle the event submission
 // You can add more complex logic here if desired
-const onFailDodgeballSubmitEvent = (state: DodgeballState) => {
-  DodgeballStateSetters.addMessage(state, "onFailDodgeballSubmitEvent called", "red");
+const onFailDodgeballSubmitEvent = (addMessage: (message: string, color: MessageColor) => void) => {
+  addMessage("onFailDodgeballSubmitEvent called", MessageColor.RED);
 };
 
-const onSuccessDodgeballSubmitEvent = (state: DodgeballState) => {
-  DodgeballStateSetters.addMessage(state, "onSuccessDodgeballSubmitEvent called", "green");
+const onSuccessDodgeballSubmitEvent = (addMessage: (message: string, color: MessageColor) => void) => {
+  addMessage("onSuccessDodgeballSubmitEvent called", MessageColor.GREEN);
 };
 
-export const sendServerEvent = async (state: DodgeballState, apiParams: IProcessDodgeballServerEventApiParams) => {
-  const dodgeball = DodgeballStateGetters.getDodgeball(state);
+export const sendServerEvent = async (dodgeball: Dodgeball | null | undefined, addMessage: (message: string, color: MessageColor) => void, apiParams: IProcessDodgeballServerEventApiParams) => {
   if (!dodgeball) {
     throw new Error("Dodgeball SDK not initialized");
   }
@@ -60,9 +60,9 @@ export const sendServerEvent = async (state: DodgeballState, apiParams: IProcess
   const responseData: IProcessDodgeballServerEventResult = await endpointResponse.json();
 
   if (!endpointResponse.ok || !responseData.success) {
-    onFailDodgeballSubmitEvent(state);
+    onFailDodgeballSubmitEvent(addMessage);
   } else {
-    onSuccessDodgeballSubmitEvent(state);
+    onSuccessDodgeballSubmitEvent(addMessage);
   }
 };
 
@@ -104,29 +104,29 @@ interface IProcessDodgeballCheckpointResult {
 
 // These are very simple ways to handle the checkpoint execution
 // You can add more complex logic here if desired
-const onCheckpointError = (state: DodgeballState, verification: IVerification | null, message: string) => {
+const onCheckpointError = (addMessage: (message: string, color: MessageColor) => void, verification: IVerification | null, message: string) => {
   console.log("onCheckpointError called", verification, message);
-  DodgeballStateSetters.addMessage(state, "onCheckpointError called with message: " + JSON.stringify(message), "red");
+  addMessage("onCheckpointError called with message: " + JSON.stringify(message), MessageColor.RED);
 };
 
-const onCheckpointApproved = (state: DodgeballState, verification: IVerification) => {
+const onCheckpointApproved = (addMessage: (message: string, color: MessageColor) => void, verification: IVerification) => {
   console.log("onCheckpointApproved called", verification);
-  DodgeballStateSetters.addMessage(state, "onCheckpointApproved called", "green");
+  addMessage("onCheckpointApproved called", MessageColor.GREEN);
 };
 
-const onCheckpointDenied = (state: DodgeballState, verification: IVerification) => {
+const onCheckpointDenied = (addMessage: (message: string, color: MessageColor) => void, verification: IVerification) => {
   console.log("onCheckpointDenied called", verification);
-  DodgeballStateSetters.addMessage(state, "onCheckpointDenied called", "orange");
+  addMessage("onCheckpointDenied called", MessageColor.RED);
 };
 
 export const processCheckpoint = async (
-  state: DodgeballState,
+  dodgeball: Dodgeball | null | undefined,
+  addMessage: (message: string, color?: MessageColor) => void,
   apiParams: IProcessDodgeballCheckpointApiParams,
   // This will only be sent when the function is called recursively (e.g. after a second step client side step is completed)
   previousVerificationId: string | null = null
 ) => {
   try {
-    const dodgeball = DodgeballStateGetters.getDodgeball(state);
     if (!dodgeball) {
       throw new Error("Dodgeball SDK not initialized");
     }
@@ -162,25 +162,25 @@ export const processCheckpoint = async (
 
     if (verification.stepData?.customMessage) {
       try {
-        DodgeballStateSetters.addMessage(state, "Received custom message...\n" + JSON.stringify(JSON.parse(verification.stepData.customMessage), null, 2));
+        addMessage("Received custom message...\n" + JSON.stringify(JSON.parse(verification.stepData.customMessage), null, 2), MessageColor.YELLOW);
       } catch (err) {
-        DodgeballStateSetters.addMessage(state, "Received custom message...\n" + verification.stepData.customMessage);
+        addMessage("Received custom message...\n" + verification.stepData.customMessage, MessageColor.YELLOW);
       }
     }
 
     dodgeball.handleVerification(verification, {
       onVerified: async (verification) => {
         // Call recursively if an additional step is required
-        DodgeballStateSetters.addMessage(state, `Checkpoint verification ${verification.id} received, processing next step`);
-        await processCheckpoint(state, apiParams, verification.id);
+        addMessage(`Checkpoint verification ${verification.id} received, processing next step`, MessageColor.BLUE);
+        await processCheckpoint(dodgeball, addMessage, apiParams, verification.id);
       },
       onApproved: async (verification) => {
         // Handle the approved action
-        onCheckpointApproved(state, verification);
+        onCheckpointApproved(addMessage, verification);
       },
       onDenied: async (verification) => {
         // Handle the denied action
-        onCheckpointDenied(state, verification);
+        onCheckpointDenied(addMessage, verification);
       },
       onError: async (error) => {
         // Handle the checkpoint error
@@ -188,7 +188,7 @@ export const processCheckpoint = async (
         if (error instanceof Error) {
           errorMessage = error.message;
         }
-        onCheckpointError(state, verification, "Dodgeball received Error status: " + errorMessage);
+        onCheckpointError(addMessage, verification, "Dodgeball received Error status: " + errorMessage);
       },
     });
   } catch (error) {
@@ -197,6 +197,6 @@ export const processCheckpoint = async (
     if (error instanceof Error) {
       errorMessage = error.message;
     }
-    onCheckpointError(state, null, "An error occurred while processing the checkpoint: " + errorMessage);
+    onCheckpointError(addMessage, null, "An error occurred while processing the checkpoint: " + errorMessage);
   }
 };

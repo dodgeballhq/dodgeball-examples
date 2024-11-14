@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Client/Next.js | Dodgeball Examples",
+  title: "Next.js Improper | Dodgeball Examples | Client",
   description: "This example demonstrates how to use the Dodgeball Client SDK with Next.js.",
 };
 
@@ -14,7 +14,6 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        // className={`${geistSans.variable} ${geistMono.variable} antialiased`}
         suppressHydrationWarning={true}
       >
         {children}

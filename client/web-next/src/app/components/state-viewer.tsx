@@ -1,31 +1,26 @@
 "use client";
 
 import { FC } from "react";
-import dodgeballGlobalState from "../helpers/state";
+import { useCheckpointStateContext } from "../contexts/CheckpointStateProvider";
+import { useDodgeballProvider } from "../contexts/DodgeballProvider";
 
-interface StateViewerProps {
-  state: any 
-}
-export const StateViewer: FC<StateViewerProps> = ({ state }) => {
-  if (!state) {
-    state = {
-      messages: [],
-    };
-  };
+export const StateViewer: FC = () => {
+  const { currentCheckpointState } = useCheckpointStateContext();
+  const { dodgeball } = useDodgeballProvider();
   return (
     <div className="state-viewer">
-      <div>Dodgeball {dodgeballGlobalState.getDodgeball() ? "initialized" : "not initialized"}</div>
-      <div>Using API: {dodgeballGlobalState.getDodgeball() ? "Yes" : "No"}</div>
-      <div>Submit Button Action: {dodgeballGlobalState.getSubmitButtonAction()}</div>
-      <div>Session ID: {dodgeballGlobalState.getSessionId() ?? "No session ID"}</div>
-      <div>User ID: {dodgeballGlobalState.getUserId() ?? "No user ID"}</div>
-      <div>Checkpoint Name: {dodgeballGlobalState.getCheckpointName()}</div>
-      <div>Checkpoint Payload: {JSON.stringify(dodgeballGlobalState.getCheckpointPayload())}</div>
-      <div>Checkpoint Payload is Valid: {dodgeballGlobalState.getCheckpointPayloadIsValid() ? "Yes" : "No"}</div>
-      <div>Server Event Name: {dodgeballGlobalState.getServerEventName()}</div>
-      <div>Server Event Payload: {JSON.stringify(dodgeballGlobalState.getServerEventPayload())}</div>
-      <div>Server Event Payload is Valid: {dodgeballGlobalState.getServerEventPayloadIsValid() ? "Yes" : "No"}</div>
-      <div>Message Count: {dodgeballGlobalState.getMessages().length ?? 0}</div>
+      <div>Dodgeball {dodgeball ? "initialized" : "not initialized"}</div>
+      <div>Using API: {dodgeball ? "Yes" : "No"}</div>
+      <div>Submit Button Action: {currentCheckpointState.submitButtonAction}</div>
+      <div>Session ID: {currentCheckpointState.sessionId ?? "No session ID"}</div>
+      <div>User ID: {currentCheckpointState.userId ?? "No user ID"}</div>
+      <div>Checkpoint Name: {currentCheckpointState.checkpointName}</div>
+      <div>Checkpoint Payload: {JSON.stringify(currentCheckpointState.checkpointPayload)}</div>
+      <div>Checkpoint Payload is Valid: {currentCheckpointState.checkpointPayloadIsValid ? "Yes" : "No"}</div>
+      <div>Server Event Name: {currentCheckpointState.serverEventName}</div>
+      <div>Server Event Payload: {JSON.stringify(currentCheckpointState.serverEventPayload)}</div>
+      <div>Server Event Payload is Valid: {currentCheckpointState.serverEventPayloadIsValid ? "Yes" : "No"}</div>
+      <div>Message Count: {currentCheckpointState.messages.length ?? 0}</div>
     </div>
   )
 };

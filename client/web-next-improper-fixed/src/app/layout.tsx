@@ -3,7 +3,7 @@ import { DodgeballProvider } from "./contexts/DodgeballProvider";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Client/Next.js | Dodgeball Examples",
+  title: "Next.js Improper Fixed | Dodgeball Examples | Client",
   description: "This example demonstrates how to use the Dodgeball Client SDK with Next.js.",
 };
 
