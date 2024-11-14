@@ -6,6 +6,7 @@ export default function Home() {
       <div>Hello From Page.tsx (SSR)</div>
       <ClientComponentExample title="Client Component Example #1" />
       <ClientComponentExample title="Client Component Example #2" />
+      <ClientComponentExample title="Client Component Example #3" showDebugInfo={false} />
     </div>
   );
 }
