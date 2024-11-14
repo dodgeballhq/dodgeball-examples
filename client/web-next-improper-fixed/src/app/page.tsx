@@ -1,5 +1,5 @@
-import { SomeClientComponent } from "./components/someClientComponent";
+import { ClientComponentExample } from "./components/clientComponentExample";
 
 export default function Home() {
-  return <SomeClientComponent />;
+  return <ClientComponentExample />;
 }

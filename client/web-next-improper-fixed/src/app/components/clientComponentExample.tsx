@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useDodgeballProvider } from "../contexts/DodgeballProvider";
 
-export const SomeClientComponent = () => {
+export const ClientComponentExample = () => {
   const [newSourceToken, setNewSourceToken] = useState<string | null>(null);
   const { dodgeball, sourceToken } = useDodgeballProvider();
 
@@ -23,7 +23,9 @@ export const SomeClientComponent = () => {
       <p>{!!dodgeball ? "Dodgeball Initialized" : "Dodgeball Not Initialized"}</p>
       <p>Source Token: {sourceToken}</p>
       <p>Source Token on demand: {newSourceToken}</p>
-      <button onClick={getNewSourceToken}>Get New Source Token</button>
+      <button style={{ border: "1px solid black", padding: "10px" }} onClick={getNewSourceToken}>
+        Get New Source Token
+      </button>
     </div>
   );
 };
