@@ -11,6 +11,7 @@ export function setupStateViewer() {
     if (stateViewer) {
       stateViewer.innerHTML = `
         <div>Dodgeball ${state.dodgeball ? "initialized" : "not initialized"}</div>
+        <div>Using API: ${state.dodgeball ? "Yes" : "No"}</div>
         <div>Submit Button Action: ${state.submitButtonAction}</div>
         <div>Session ID: ${state.sessionId ?? "No session ID"}</div>
         <div>User ID: ${state.userId ?? "No user ID"}</div>
