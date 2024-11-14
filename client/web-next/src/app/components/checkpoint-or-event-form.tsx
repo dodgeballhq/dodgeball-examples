@@ -1,30 +1,71 @@
 "use client";
-import { FC } from "react";
-import dodgeballGlobalState from "../helpers/state";
+import { FC, useMemo } from "react";
+import { useCheckpointStateContext } from "../contexts/CheckpointStateProvider";
 
 export const CheckpointOrEventForm: FC = () => {
+  const { currentCheckpointState, updateCheckpointState, setCheckpointOrEventPayload } = useCheckpointStateContext();
+
   const handlePayloadChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    dodgeballGlobalState.setCheckpointPayload(e.target.value);
+    setCheckpointOrEventPayload(e.target.value);
+  };
+
+  const handlePayloadBlur = (e: React.FocusEvent<HTMLTextAreaElement>) => {
+    const payload = e.target.value;
+    try {
+      const parsedPayload = JSON.parse(payload);
+      const prettyPayload = JSON.stringify(parsedPayload, null, 2);
+      setCheckpointOrEventPayload(prettyPayload);
+    } catch (error) {
+      console.warn("Not Pretty Formatting Payload due to inability to parse");
+    }
   };
 
   const handleCheckpointNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    dodgeballGlobalState.setCheckpointName(e.target.value);
+    if (currentCheckpointState.submitButtonAction === "checkpoint") {
+      updateCheckpointState({ checkpointName: e.target.value });
+    } else if (currentCheckpointState.submitButtonAction === "event") {
+      updateCheckpointState({ serverEventName: e.target.value });
+    }
   };
 
+  const payloadValue = useMemo(() => {
+    if (currentCheckpointState.submitButtonAction === "checkpoint") {
+      return currentCheckpointState.rawCheckpointPayload ?? "";
+    } else if (currentCheckpointState.submitButtonAction === "event") {
+      return currentCheckpointState.rawServerEventPayload ?? "";
+    }
+  }, [currentCheckpointState]);
+
+  const checkpointOrEventName = useMemo(() => {
+    if (currentCheckpointState.submitButtonAction === "checkpoint") {
+      return currentCheckpointState.checkpointName;
+    } else if (currentCheckpointState.submitButtonAction === "event") {
+      return currentCheckpointState.serverEventName;
+    }
+  }, [currentCheckpointState]);
+
+  const fieldLabel = useMemo(() => {
+    if (currentCheckpointState.submitButtonAction === "checkpoint") {
+      return "Checkpoint";
+    } else if (currentCheckpointState.submitButtonAction === "event") {
+      return "Server Event";
+    }
+  }, [currentCheckpointState]);
+
   return (
-    <>
-    <div className="tabs-container">
-      <div className="tab tab-active">Call a Checkpoint</div>
-      <div className="tab tab-inactive">Send a Server Event</div>
-</div>
-      <div className="field-group">
-        <div className="field-label"><label htmlFor="checkpoint-name">Checkpoint Name</label></div>
-        <input onChange={handleCheckpointNameChange} className="field-checkpoint-name-input" name="checkpoint-name" type="text" placeholder="e.g. PAYMENT" defaultValue={dodgeballGlobalState.getCheckpointName()} />
+    <div>
+      <div className="tabs-container">
+        <div className={`tab ${currentCheckpointState.submitButtonAction === "checkpoint" ? "tab-active": ""}`} onClick={() => updateCheckpointState({ submitButtonAction: "checkpoint" })}>Call a Checkpoint</div>
+        <div className={`tab ${currentCheckpointState.submitButtonAction === "event" ? "tab-active": ""}`} onClick={() => updateCheckpointState({ submitButtonAction: "event" })}>Send a Server Event</div>
       </div>
       <div className="field-group">
-        <div className="field-label"><label htmlFor="checkpoint-payload">Checkpoint Payload</label></div>
-        <textarea onChange={handlePayloadChange} className="payload-input" name="checkpoint-payload" rows={4} cols={20} defaultValue={JSON.stringify(dodgeballGlobalState.getCheckpointPayload())}></textarea>
+        <div className="field-label"><label htmlFor="checkpoint-name">{fieldLabel} Name</label></div>
+        <input onChange={handleCheckpointNameChange} className="field-checkpoint-name-input" name="checkpoint-name" type="text" placeholder="e.g. PAYMENT" value={checkpointOrEventName ?? "UNSET"} />
       </div>
-    </>
+      <div className="field-group">
+        <div className="field-label"><div>{fieldLabel} Payload</div></div>
+        <textarea onChange={handlePayloadChange} onBlur={handlePayloadBlur} className="payload-input" name="checkpoint-payload" rows={4} cols={20} value={payloadValue}></textarea>
+      </div>
+    </div>
   );
 };

@@ -53,6 +53,10 @@ textarea,
 select {
   font: inherit;
 }
+
+input, textarea, select {
+  @apply bg-gray-100 px-2 py-0.5 border border-gray-300 w-[350px]
+}
 /*
   8. Avoid text overflows
 */
@@ -75,6 +79,7 @@ h6 {
 
 button {
   cursor: pointer;
+  @apply px-2 py-0.5 border border-gray-300 rounded-md hover:bg-gray-100
 }
 
 .header-container {
@@ -169,10 +174,6 @@ button {
   height: 200px;
 }
 
-.user-session-list {
-  margin-left: 20px;
-}
-
 .error-message {
   color: red;
   font-size: 12px;
@@ -208,15 +209,11 @@ button {
   margin-right: 5px;
 }
 
-.field-text-input {
-  width: 350px;
-  margin-bottom: 5px;
-}
 
 .checkpoint-response-box {
   padding: 10px;
   margin-bottom: 20px;
-  border: 1px solid #ddd;
+  border: 1px solid ;
   max-height: 400px;
 }
 
@@ -227,12 +224,11 @@ button {
 }
 
 .submit-button-messages {
-  margin-top: 10px;
-  margin-left: 20px;
-  color: red;
+  @apply text-xs font-mono my-2 mx-4 text-red-700
 }
 
 #messages-container {
   max-height: 400px;
   padding: 20px;
+  @apply overflow-y-auto
 }

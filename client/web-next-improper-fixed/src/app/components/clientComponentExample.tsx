@@ -3,29 +3,41 @@
 import { useState } from "react";
 import { useDodgeballProvider } from "../contexts/DodgeballProvider";
 
-export const ClientComponentExample = () => {
-  const [newSourceToken, setNewSourceToken] = useState<string | null>(null);
+interface ClientComponentExampleProps {
+  title: string;
+  showDebugInfo?: boolean;
+}
+export const ClientComponentExample = ({ title, showDebugInfo = true }: ClientComponentExampleProps) => {
+  const [onDemandSourceToken, setOnDemandSourceToken] = useState<string | null>(null);
+  const [onDemandSourceTokenLastUpdated, setOnDemandSourceTokenLastUpdated] = useState<Date | null>(null);
   const { dodgeball, sourceToken } = useDodgeballProvider();
 
-  const getNewSourceToken = async () => {
+  const getSourceTokenOnDemand = async () => {
     if (!dodgeball) {
       console.log("dodgeball not initialized yet");
       return;
     }
     const newSourceToken = await dodgeball.getSourceToken();
-    console.log("newSourceToken", newSourceToken);
-    setNewSourceToken(newSourceToken);
+    console.log("onDemandSourceToken", newSourceToken);
+    setOnDemandSourceToken(newSourceToken);
+    setOnDemandSourceTokenLastUpdated(new Date());
   };
 
   return (
-    <div>
-      <h1>Hello Dodgeball</h1>
-      <p>{!!dodgeball ? "Dodgeball Initialized" : "Dodgeball Not Initialized"}</p>
-      <p>Source Token: {sourceToken}</p>
-      <p>Source Token on demand: {newSourceToken}</p>
-      <button style={{ border: "1px solid black", padding: "10px" }} onClick={getNewSourceToken}>
-        Get New Source Token
-      </button>
+    <div className="border bg-gray-200 p-4 flex flex-col gap-2">
+      <h1>{title}</h1>
+      {showDebugInfo && (
+        <div className="flex flex-col gap-2 border border-black p-2">
+          <p>Debug info about Dodgeball (for debugging)</p>
+          <p>{!!dodgeball ? "Dodgeball Initialized" : "Dodgeball Not Initialized"}</p>
+          <p>Source Token: {sourceToken}</p>
+          <p>Source Token on Demand: {onDemandSourceToken}</p>
+          <p>Source Token on Demand last updated: {onDemandSourceTokenLastUpdated?.toLocaleString()}</p>
+        <button className="border border-black rounded max-w-fit p-2 bg-gray-300 hover:bg-gray-400" onClick={getSourceTokenOnDemand}>
+          Get Source Token on Demand
+        </button>
+        </div>
+      )}
     </div>
   );
 };
