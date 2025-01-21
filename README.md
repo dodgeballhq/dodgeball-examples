@@ -21,6 +21,10 @@ The `server` folder contains all server-side examples:
 - [.NET](#.NET)
 - [Golang](#golang)
 
+The `complete` folder contains example applications that have full stack implementations of Dodgeball. These are used to illustrate more specific use cases and scenarios.
+
+- [Finfire](https://github.com/dodgeballhq/dodgeball-examples/tree/main/complete/finfire/README.md)
+
 You should use these examples along with the [official Dodgeball documentation](https://docs.dodgeballhq.com) to experiment with your Dodgeball account. You will need a [free Dodgeball account](https://app.dodgeballhq.com/signup) to run these examples.
 
 Once you have an account, login, visit the **Checkpoint Studio**, then create a new checkpoint called `PAYMENT`. Open the **Step Palette**, then drag and drop an *Allow* step into your checkpoint. Drag an arrow from the *PAYMENT* step to the *Allow* step to connect them. Then click the **Publish** button in the top-right of your screen.
