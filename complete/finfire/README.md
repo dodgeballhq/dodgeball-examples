@@ -6,7 +6,7 @@ This example is built with Next.js, TypeScript, TailwindCSS, and Dodgeball.
 
 ## Dodgeball Setup
 
-To run this example, you will need to set up a Dodgeball account and get the API keys. You can do this by following the instructions in the [Dodgeball documentation](https://docs.dodgeballhq.com/docs/getting-started/setup).
+To run this example, you will need to set up a Dodgeball account and get the API keys. You can do this by following the instructions in the [Dodgeball documentation](https://docs.dodgeballhq.com/developers/integrating_dodgeball/quick-start).
 
 ## Dodgeball API Keys
 
