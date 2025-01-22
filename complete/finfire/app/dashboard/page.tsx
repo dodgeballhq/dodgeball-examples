@@ -7,6 +7,10 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 import { useToast } from "@/components/ui/use-toast";
 import { TransactionsService } from "@/lib/api/transactions/service";
 import { UsersService } from "@/lib/api/users/service";
+import { processDodgeballVerification } from "@/lib/dodgeball-extensions/client-helpers";
+import { IProcessClientVerification } from "@/lib/dodgeball-extensions/client-types";
+import { useDodgeballProvider } from "@/lib/providers/dodgeball-provider";
+import { IVerification, IVerificationError } from "@dodgeball/trust-sdk-client/dist/types/types";
 import { Transaction, User } from "@prisma/client";
 import { IdCardIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -19,6 +23,8 @@ export default function Dashboard() {
   const router = useRouter();
 
   // Dodgeball State
+  const [isVerifying, setIsVerifying] = useState(false);
+  const { dodgeball } = useDodgeballProvider();
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -53,16 +59,66 @@ export default function Dashboard() {
   };
 
   const handleVerifyId = async () => {
+    setIsVerifying(true);
     if (!user) return;
 
-    try {
-      const updatedUser = await UsersService.updateUser(user.id, { isVerified: true })
-      setUser(updatedUser.user)
+    const onApproved = async (verification: IVerification) => {
+      console.log("Checkpoint approved", verification);
+      const updatedUser = await UsersService.updateUser(user.id, { isVerified: true });
+      setUser(updatedUser.user);
       toast({
         title: "Success",
         description: "Your ID has been verified successfully",
         duration: 3000,
-      })
+      });
+      setIsVerifying(false);
+    };
+
+    const onDenied = async (verification: IVerification) => {
+      console.log("Checkpoint denied", verification);
+      toast({
+        variant: "destructive",
+        title: "ID Verification Unsuccessful",
+        description: "Your ID was not verified",
+        duration: 3000,
+      });
+      setIsVerifying(false);
+    };
+
+    const onError = async (error: IVerificationError) => {
+      console.error("Checkpoint error", error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "An error occurred while verifying your ID",
+        duration: 3000,
+      });
+      setIsVerifying(false);
+    };
+
+    try {
+      const params: IProcessClientVerification = {
+        dodgeball,
+        internalEndpoint: "api/checkpoint",
+        clientVerification: {
+          checkpointName: "VERIFY_ID",
+          userId: user.email,
+          payload: {
+            customer: {
+              firstName: user.firstName,
+              lastName: user.lastName,
+              primaryEmail: user.email,
+            },
+          },
+        },
+        callbacks: {
+          onApproved,
+          onDenied,
+          onError,
+        },
+      };
+      const checkpointResult = await processDodgeballVerification(params);
+      console.log("Checkpoint result", checkpointResult);
     } catch (error) {
       console.error("Error verifying ID:", error);
       toast({
@@ -71,6 +127,7 @@ export default function Dashboard() {
         description: "An error occurred while verifying your ID",
         duration: 3000,
       });
+      setIsVerifying(false);
     }
   };
 
@@ -96,6 +153,34 @@ export default function Dashboard() {
     }
   };
 
+  const renderVerificationAction = () => {
+    if (isVerifying) {
+      return (
+        <div className="flex flex-col gap-2">
+          <div className="text-sm text-gray-500">Verifying your identity...</div>
+        </div>
+      );
+    }
+
+    if (!user) return null;
+
+    if (!user.isVerified) {
+      return (
+        <div className="flex flex-col gap-2">
+          <Button variant="default" size="sm" onClick={handleVerifyId}>
+            Verify your Identity
+          </Button>
+          <div className="text-sm text-gray-500">This will allow you to make transactions</div>
+        </div>
+      );
+    }
+
+    return (
+      <Button variant="outline" size="sm" onClick={handleResetVerification}>
+        Reset Verification
+      </Button>
+    );
+  };
 
   if (!user) return null;
 
@@ -129,17 +214,7 @@ export default function Dashboard() {
                   )}
                 </div>
                 <div><strong>Email:</strong> {user.email}</div>
-                <div className="mt-2">
-                  {!user.isVerified && (
-                    <div className="flex flex-col gap-2">
-                      <Button variant="default" size="sm" onClick={handleVerifyId}>Verify your Identity</Button>
-                      <div className="text-sm text-gray-500">This will allow you to make transactions</div>
-                    </div>
-                  )}
-                  {user.isVerified && (
-                    <Button variant="outline" size="sm" onClick={handleResetVerification}>Reset Verification</Button>
-                  )}
-                </div>
+                <div className="mt-2">{renderVerificationAction()}</div>
               </div>
             </CardContent>
           </Card>
