@@ -5,12 +5,11 @@ import {
 import { IVerification } from "@dodgeball/trust-sdk-client/dist/types/types";
 import { Dodgeball, DodgeballApiVersion } from "@dodgeball/trust-sdk-server";
 import { ICheckpointOptions } from "@dodgeball/trust-sdk-server/dist/types/types";
-import * as dotenv from "dotenv";
-dotenv.config();
+import { serverEnv, sharedEnv } from "../environment";
 
 // Get environment variables
-const DODGEBALL_PRIVATE_API_KEY = process.env.DODGEBALL_PRIVATE_API_KEY ?? "";
-const DODGEBALL_API_URL = process.env.DODGEBALL_API_URL ?? "";
+const DODGEBALL_PRIVATE_API_KEY = serverEnv.dodgeball.privateApiKey;
+const DODGEBALL_API_URL = sharedEnv.dodgeball.apiUrl;
 
 // Validate environment variables at startup
 if (!DODGEBALL_PRIVATE_API_KEY || !DODGEBALL_API_URL) {

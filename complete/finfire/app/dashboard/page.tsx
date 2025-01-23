@@ -199,7 +199,8 @@ export default function Dashboard() {
             </CardHeader>
             <CardContent>
               <div className="flex flex-col justify-center gap-1">
-                <div className="flex gap-2 items-center"><strong>Name:</strong> {user.firstName} {user.lastName}
+                <div className="flex gap-2 items-center">
+                  <strong>Name:</strong> {user.firstName} {user.lastName}
                   {user.isVerified && (
                     <Tooltip delayDuration={300}>
                       <TooltipTrigger>
@@ -207,13 +208,13 @@ export default function Dashboard() {
                           <IdCardIcon className="w-5 h-5 text-cyan-900" />
                         </div>
                       </TooltipTrigger>
-                      <TooltipContent>
-                        Account is ID verified
-                      </TooltipContent>
+                      <TooltipContent>Account is ID verified</TooltipContent>
                     </Tooltip>
                   )}
                 </div>
-                <div><strong>Email:</strong> {user.email}</div>
+                <div>
+                  <strong>Email:</strong> {user.email}
+                </div>
                 <div className="mt-2">{renderVerificationAction()}</div>
               </div>
             </CardContent>
