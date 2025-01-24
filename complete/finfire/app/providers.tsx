@@ -8,18 +8,17 @@ import { DodgeballProvider } from "@/lib/providers/dodgeball-provider";
 import { SessionProvider } from "@/lib/providers/session-provider";
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
-    <SessionProvider>
-      <TooltipProvider>
-        <ToastProvider>
-          <DodgeballProvider
-            publicApiKey={clientEnv.dodgeball.publicApiKey}
-            dodgeballApiUrl={sharedEnv.dodgeball.apiUrl}
-          >
+    <DodgeballProvider
+      publicApiKey={clientEnv.dodgeball.publicApiKey}
+      dodgeballApiUrl={sharedEnv.dodgeball.apiUrl}>
+      <SessionProvider>
+        <TooltipProvider>
+          <ToastProvider>
             {children}
             <Toaster />
-          </DodgeballProvider>
-        </ToastProvider>
-      </TooltipProvider>
-    </SessionProvider>
+          </ToastProvider>
+        </TooltipProvider>
+      </SessionProvider>
+    </DodgeballProvider>
   );
 }

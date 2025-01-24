@@ -44,7 +44,7 @@ export const DodgeballProvider: React.FC<DodgeballProviderProps> = ({ children, 
       const dodgeballConfig: IDodgeballConfig = {
         apiVersion: DodgeballApiVersion.v1,
         apiUrl: dodgeballApiUrl,
-        logLevel: "ERROR" as any,
+        // logLevel: "ERROR" as any,
       };
 
       try {

@@ -19,7 +19,7 @@ export const PhoneVerificationButton: React.FC<PhoneVerificationButtonProps> = (
   // Dodgeball State
   const [isVerifying, setIsVerifying] = useState(false);
   const { dodgeball } = useDodgeballProvider();
-  const { sessionUser, refreshSession } = useSession();
+  const { session, sessionUser, refreshSession } = useSession();
 
   if (!sessionUser) return null;
   if (!sessionUser.phone) return null;
@@ -69,6 +69,7 @@ export const PhoneVerificationButton: React.FC<PhoneVerificationButtonProps> = (
         clientVerification: {
           checkpointName: "VERIFY_PHONE",
           userId: sessionUser.id,
+          sessionId: session?.id,
           payload: {
             sessionUser: sessionUser,
             mfa: {
@@ -77,7 +78,7 @@ export const PhoneVerificationButton: React.FC<PhoneVerificationButtonProps> = (
             customer: {
               firstName: sessionUser.firstName,
               lastName: sessionUser.lastName,
-              primaryEmail: sessionUser.phone,
+              primaryEmail: sessionUser.email,
               primaryPhone: sessionUser.phone,
             },
           },

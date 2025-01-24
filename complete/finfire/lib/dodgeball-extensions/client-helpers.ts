@@ -91,7 +91,7 @@ export const processDodgeballVerification = async (
  * @param verification The verification object to get the custom message from
  * @returns The custom message, or null if no custom message is found
  */
-const getCustomMessageFromVerification = (verification: IVerification): string | null | Record<string, unknown> => {
+export const getCustomMessageFromVerification = (verification: IVerification): string | null | Record<string, unknown> => {
   if (verification.stepData?.customMessage) {
     try {
       return JSON.parse(verification.stepData.customMessage) as Record<string, unknown>;

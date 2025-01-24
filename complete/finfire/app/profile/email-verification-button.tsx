@@ -65,7 +65,8 @@ export const EmailVerificationButton: React.FC<EmailVerificationButtonProps> = (
         internalEndpoint: "api/checkpoint",
         clientVerification: {
           checkpointName: "VERIFY_EMAIL",
-          userId: sessionUser.email,
+          userId: sessionUser.id,
+          sessionId: session?.id,
           payload: {
             sessionUser: sessionUser,
             mfa: {

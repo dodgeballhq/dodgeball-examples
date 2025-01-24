@@ -65,7 +65,8 @@ export const IdVerificationButton: React.FC<IdVerificationButtonProps> = ({ upda
         internalEndpoint: "api/checkpoint",
         clientVerification: {
           checkpointName: "VERIFY_ID",
-          userId: sessionUser.email,
+          userId: sessionUser.id,
+          sessionId: session?.id,
           payload: {
             sessionUser: sessionUser,
             customer: {
