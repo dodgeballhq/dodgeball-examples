@@ -1,20 +1,28 @@
+import LogoCard from "@/components/custom/logo-card";
 import { Button } from "@/components/ui/button";
-import Image from "next/image";
+import { CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { NavigationRoutes } from "@/lib/navigation";
 import Link from "next/link";
 
 export default function Home() {
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-b from-gray-100 to-gray-200 gap-4">
-      <Image src="/favicon.svg" alt="FinFire" width={100} height={100} />
-      <h1 className="text-4xl font-bold">Welcome to FinFire</h1>
-      <div className="space-x-4">
-        <Button asChild>
-          <Link href="/login">Login</Link>
-        </Button>
-        <Button asChild variant="outline">
-          <Link href="/signup">Sign Up</Link>
-        </Button>
-      </div>
+    <div className="flex items-center justify-center min-h-screen">
+      <LogoCard>
+        <CardHeader>
+          <CardTitle className="text-4xl font-bold">Welcome</CardTitle>
+          <CardDescription>Welcome to FinFire: The financial firepower you never knew you needed</CardDescription>
+        </CardHeader>
+        <CardFooter>
+          <div className="flex justify-between w-full">
+            <Button asChild>
+              <Link href="/auth/login">Login</Link>
+            </Button>
+            <Button asChild variant="outline">
+              <Link href={NavigationRoutes.SIGNUP}>Sign Up</Link>
+            </Button>
+          </div>
+        </CardFooter>
+      </LogoCard>
     </div>
   );
 }

@@ -1,3 +1,4 @@
+import { MainNav } from "@/components/custom/main-nav";
 import type { Metadata } from "next";
 import "./globals.css";
 import { Providers } from "./providers";
@@ -18,7 +19,16 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <Providers>{children}</Providers>
+        <Providers>
+          <div className="flex">
+            <MainNav />
+            <main className="flex-1">
+              <div className="min-h-screen bg-gradient-to-b from-gray-100 to-gray-200 p-8">
+                <div className="max-w-4xl mx-auto">{children}</div>
+              </div>
+            </main>
+          </div>
+        </Providers>
       </body>
     </html>
   );

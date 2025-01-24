@@ -1,6 +1,7 @@
 "use client";
 
 import { Dodgeball, DodgeballApiVersion } from "@dodgeball/trust-sdk-client";
+import { IDodgeballConfig } from "@dodgeball/trust-sdk-client/dist/types/types";
 import React, { createContext, ReactNode, useContext, useEffect, useState } from "react";
 
 interface DodgeballContextState {
@@ -40,9 +41,10 @@ export const DodgeballProvider: React.FC<DodgeballProviderProps> = ({ children, 
         return;
       }
 
-      const dodgeballConfig = {
+      const dodgeballConfig: IDodgeballConfig = {
         apiVersion: DodgeballApiVersion.v1,
         apiUrl: dodgeballApiUrl,
+        logLevel: "ERROR" as any,
       };
 
       try {

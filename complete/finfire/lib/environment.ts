@@ -1,7 +1,4 @@
-import dotenv from "dotenv";
 import { z } from "zod";
-
-dotenv.config();
 
 const clientSchema = z.object({
   dodgeball: z.object({
@@ -19,6 +16,7 @@ const sharedSchema = z.object({
 });
 
 const serverSchema = z.object({
+  authSecret: z.string().default("UNSET"),
   dodgeball: z.object({
     privateApiKey: z.string().default("UNSET"),
   }),
@@ -31,6 +29,7 @@ export type SharedEnv = z.infer<typeof sharedSchema>;
 // Use process.env for server vars
 const getServerEnv = () => {
   const serverEnv: ServerEnv = serverSchema.parse({
+    authSecret: process.env.AUTH_SECRET,
     dodgeball: {
       privateApiKey: process.env.DODGEBALL_PRIVATE_API_KEY,
     },

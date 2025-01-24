@@ -8,16 +8,20 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(uuid())
-  firstName String
-  lastName  String
-  email     String   @unique
-  password  String
-  isVerified Boolean @default(false)
-  balance   Float    @default(0)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  transactions Transaction[]
+  id                String          @id @default(uuid())
+  firstName         String
+  lastName          String
+  email             String          @unique
+  phone             String?         @unique
+  hashedPassword    String
+  isIdVerified      Boolean         @default(false)
+  isEmailVerified   Boolean         @default(false)
+  isPhoneVerified   Boolean         @default(false)
+  image             String?
+  balance           Float           @default(0)
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+  transactions      Transaction[]
 }
 
 model Transaction {
