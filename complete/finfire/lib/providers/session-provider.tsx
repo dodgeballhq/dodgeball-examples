@@ -5,6 +5,7 @@ import { getIsPublicRoute, NavigationRoutes } from "@/lib/navigation";
 import { useRouter } from "next/navigation";
 import { createContext, ReactNode, useContext, useEffect, useState } from "react";
 import { UserResponse } from "../api/users/types";
+import { useDodgeballProvider } from "./dodgeball-provider";
 
 interface SessionContextType {
   session: Session | null;
@@ -18,6 +19,7 @@ const SessionContext = createContext<SessionContextType | undefined>(undefined);
 
 export function SessionProvider({ children }: { children: ReactNode }) {
   const router = useRouter();
+  const { dodgeball } = useDodgeballProvider();
 
   const handleUnauthenticated = () => {
     localStorage.removeItem("authToken");
@@ -69,7 +71,6 @@ export function SessionProvider({ children }: { children: ReactNode }) {
         handleUnauthenticated();
         return;
       }
-
       setSessionState((prev) => ({
         ...prev,
         session,
@@ -98,6 +99,15 @@ export function SessionProvider({ children }: { children: ReactNode }) {
       }
     }
   }, [sessionState.status, router]);
+
+  // When Dodgeball is initialized, and we have a session + user, track the user
+  useEffect(() => {
+    if (dodgeball && sessionState.session?.id && sessionState.sessionUser?.id) {
+      console.log("Running dodgeball track");
+      dodgeball.track(sessionState.session.id, sessionState.sessionUser.id);
+      console.log("Dodgeball track ran successfully");
+    }
+  }, [dodgeball, sessionState.session, sessionState.sessionUser]);
 
   return <SessionContext.Provider value={sessionState}>{children}</SessionContext.Provider>;
 }
