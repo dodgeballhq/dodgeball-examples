@@ -26,8 +26,8 @@ export interface UserResponse {
   isEmailVerified: boolean;
   isPhoneVerified: boolean;
   balance: number;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface CreateUserRequest {

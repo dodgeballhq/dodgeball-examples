@@ -1,7 +1,7 @@
 "use client";
 
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { useSession } from "@/lib/providers/session-provider";
+import { useUser } from "@/lib/api/users/use-user";
 import { IdCardIcon } from "lucide-react";
 
 interface IdVerificationBadgeProps {
@@ -9,13 +9,13 @@ interface IdVerificationBadgeProps {
 }
 
 export const IdVerificationBadge: React.FC<IdVerificationBadgeProps> = ({ showText = true }) => {
-  const { sessionUser } = useSession();
-  if (!sessionUser) return null;
+  const { data: userData } = useUser();
+  if (!userData?.user) return null;
 
-  const bgColor = sessionUser?.isIdVerified ? "bg-cyan-200" : "bg-red-200";
-  const textColor = sessionUser?.isIdVerified ? "text-cyan-900" : "text-red-900";
-  const text = sessionUser?.isIdVerified ? "Verified" : "Not Verified";
-  const tooltipText = sessionUser?.isIdVerified ? "Account is ID verified" : "Account is not ID verified";
+  const bgColor = userData?.user?.isIdVerified ? "bg-cyan-200" : "bg-red-200";
+  const textColor = userData?.user?.isIdVerified ? "text-cyan-900" : "text-red-900";
+  const text = userData?.user?.isIdVerified ? "Verified" : "Not Verified";
+  const tooltipText = userData?.user?.isIdVerified ? "Account is ID verified" : "Account is not ID verified";
 
   return (
     <Tooltip delayDuration={300}>

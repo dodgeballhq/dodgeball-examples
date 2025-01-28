@@ -1,7 +1,7 @@
 "use client";
 
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { useSession } from "@/lib/providers/session-provider";
+import { useUser } from "@/lib/api/users/use-user";
 import { IdCardIcon } from "lucide-react";
 
 interface PhoneVerificationBadgeProps {
@@ -9,13 +9,13 @@ interface PhoneVerificationBadgeProps {
 }
 
 export const PhoneVerificationBadge: React.FC<PhoneVerificationBadgeProps> = ({ showText = true }) => {
-  const { sessionUser } = useSession();
-  if (!sessionUser) return null;
+  const { data: userData } = useUser();
+  if (!userData?.user) return null;
 
-  const bgColor = sessionUser?.isPhoneVerified ? "bg-cyan-200" : "bg-red-200";
-  const textColor = sessionUser?.isPhoneVerified ? "text-cyan-900" : "text-red-900";
-  const text = sessionUser?.isPhoneVerified ? "Verified" : "Not Verified";
-  const tooltipText = sessionUser?.isPhoneVerified ? "Account is phone verified" : "Account is not phone verified";
+  const bgColor = userData?.user?.isPhoneVerified ? "bg-cyan-200" : "bg-red-200";
+  const textColor = userData?.user?.isPhoneVerified ? "text-cyan-900" : "text-red-900";
+  const text = userData?.user?.isPhoneVerified ? "Verified" : "Not Verified";
+  const tooltipText = userData?.user?.isPhoneVerified ? "Account is phone verified" : "Account is not phone verified";
 
   return (
     <Tooltip delayDuration={300}>

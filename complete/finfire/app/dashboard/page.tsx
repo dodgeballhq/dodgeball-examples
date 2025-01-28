@@ -7,33 +7,33 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { TransactionsService } from "@/lib/api/transactions/service";
-import { useSession } from "@/lib/providers/session-provider";
+import { useUser } from "@/lib/api/users/use-user";
 import { Transaction } from "@prisma/client";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
 export default function Dashboard() {
   const [userTransactions, setUserTransactions] = useState<Transaction[]>([]);
-  const session = useSession();
-  const sessionUser = session?.session?.user;
+  const { data: userData } = useUser();
 
   useEffect(() => {
     const updateData = async () => {
+      const authenticatedUserId = userData?.user?.id;
       let transactionsToSet: Transaction[] = [];
-      if (sessionUser?.id) {
-        transactionsToSet = await TransactionsService.getTransactions(sessionUser.id);
+      if (authenticatedUserId) {
+        transactionsToSet = await TransactionsService.getTransactions(authenticatedUserId);
       }
       setUserTransactions(transactionsToSet);
     };
     updateData();
-  }, [sessionUser]);
+  }, [userData]);
 
   return (
     <div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
         <Card>
           <CardHeader>
-            <CardTitle>Welcome, {sessionUser?.firstName}!</CardTitle>
+            <CardTitle>Welcome, {userData?.user?.firstName}!</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex flex-col gap-2 text-muted-foreground">
@@ -65,7 +65,7 @@ export default function Dashboard() {
           </CardHeader>
           <CardContent>
             <div className="flex flex-col gap-2">
-              <p className="text-3xl font-bold">${sessionUser?.balance?.toFixed(2)}</p>
+              <p className="text-3xl font-bold">${userData?.user?.balance?.toFixed(2)}</p>
               <p className="text-muted-foreground">Available Balance</p>
             </div>
           </CardContent>

@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "@/components/ui/use-toast";
 import { UpdateUserRequest, updateUserRequestSchema } from "@/lib/api/users/types";
-import { useSession } from "@/lib/providers/session-provider";
+import { useUser } from "@/lib/api/users/use-user";
 import { useState } from "react";
 import { z } from "zod";
 
@@ -26,8 +26,8 @@ interface ProfileField {
 
 export const ProfileContent: React.FC<ProfileContentProps> = ({ updateUser }) => {
   const [hasChanged, setHasChanged] = useState(false);
-  const { sessionUser, refreshSession } = useSession();
-  if (!sessionUser) return null;
+  const { data: userData, refetch: refetchUser } = useUser();
+  if (!userData?.user) return null;
 
   const profileFields: ProfileField[] = [
     {
@@ -35,14 +35,14 @@ export const ProfileContent: React.FC<ProfileContentProps> = ({ updateUser }) =>
       label: "Name",
       type: "text",
       placeholder: "First Name",
-      value: sessionUser?.firstName ?? "",
+      value: userData?.user?.firstName ?? "",
     },
     {
       id: "lastName",
       label: "", // Empty label since it's part of the Name section
       type: "text",
       placeholder: "Last Name",
-      value: sessionUser?.lastName ?? "",
+      value: userData?.user?.lastName ?? "",
     },
     {
       id: "email",
@@ -50,7 +50,7 @@ export const ProfileContent: React.FC<ProfileContentProps> = ({ updateUser }) =>
       type: "email",
       placeholder: "Email",
       badge: <EmailVerificationBadge />,
-      value: sessionUser?.email ?? "",
+      value: userData?.user?.email ?? "",
     },
     {
       id: "phone",
@@ -58,7 +58,7 @@ export const ProfileContent: React.FC<ProfileContentProps> = ({ updateUser }) =>
       type: "tel",
       placeholder: "Phone",
       badge: <PhoneVerificationBadge />,
-      value: sessionUser?.phone ?? "",
+      value: userData?.user?.phone ?? "",
     },
   ];
 
@@ -75,9 +75,11 @@ export const ProfileContent: React.FC<ProfileContentProps> = ({ updateUser }) =>
 
       // Validate the payload using the Zod schema
       const validatedPayload = updateUserRequestSchema.parse(updatePayload);
-
-      await updateUser(sessionUser?.id, validatedPayload);
-      await refreshSession();
+      if (!userData?.user) {
+        throw new Error("User ID is required");
+      }
+      await updateUser(userData?.user?.id, validatedPayload);
+      refetchUser();
       console.log("Profile updated successfully");
       setHasChanged(false);
     } catch (error) {
@@ -150,7 +152,7 @@ export const ProfileContent: React.FC<ProfileContentProps> = ({ updateUser }) =>
           </div>
         </div>
 
-        <Button type="submit" disabled={!hasChanged}>
+        <Button type="submit" disabled={!hasChanged || !userData?.user}>
           Save Profile
         </Button>
       </div>

@@ -1,7 +1,7 @@
 "use client";
 
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { useSession } from "@/lib/providers/session-provider";
+import { useUser } from "@/lib/api/users/use-user";
 import { IdCardIcon } from "lucide-react";
 
 interface EmailVerificationBadgeProps {
@@ -9,13 +9,13 @@ interface EmailVerificationBadgeProps {
 }
 
 export const EmailVerificationBadge: React.FC<EmailVerificationBadgeProps> = ({ showText = true }) => {
-  const { sessionUser } = useSession();
-  if (!sessionUser) return null;
+  const { data: userData } = useUser();
+  if (!userData?.user) return null;
 
-  const bgColor = sessionUser?.isEmailVerified ? "bg-cyan-200" : "bg-red-200";
-  const textColor = sessionUser?.isEmailVerified ? "text-cyan-900" : "text-red-900";
-  const text = sessionUser?.isEmailVerified ? "Verified" : "Not Verified";
-  const tooltipText = sessionUser?.isEmailVerified ? "Account is email verified" : "Account is not email verified";
+  const bgColor = userData?.user?.isEmailVerified ? "bg-cyan-200" : "bg-red-200";
+  const textColor = userData?.user?.isEmailVerified ? "text-cyan-900" : "text-red-900";
+  const text = userData?.user?.isEmailVerified ? "Verified" : "Not Verified";
+  const tooltipText = userData?.user?.isEmailVerified ? "Account is email verified" : "Account is not email verified";
 
   return (
     <Tooltip delayDuration={300}>

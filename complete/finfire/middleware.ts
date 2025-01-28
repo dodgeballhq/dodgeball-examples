@@ -1,39 +1,42 @@
 import { cookies } from "next/headers";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
-import { verifyAndDecodeToken } from "./auth";
-import { getIsPublicRoute } from "./lib/navigation";
+import { verifyJwt } from "./lib/auth";
+import { getIsPublicRoute, NavigationRoutes } from "./lib/navigation";
 
 export async function middleware(request: NextRequest) {
   const requestMethod = request.method;
   const requestPath = request.nextUrl.pathname.replace(/\/+$/, "");
   const requestDescription = `${requestMethod} ${requestPath}`;
-  console.log("middleware", requestDescription);
 
   // Define public routes that don't require authentication
   const isPublicRoute = getIsPublicRoute(requestPath);
+  const isPublicDescription = isPublicRoute ? "public" : "🔒";
+  console.log("middleware ::", requestDescription, "::", isPublicDescription);
 
   // Allow access to public routes regardless of auth status
   if (isPublicRoute) {
-    console.log("--- public route");
     return NextResponse.next();
   }
-
-  console.log("--- not a public route");
 
   // Verify the token and get session
   // Get auth token from Authorization header
   const token = cookies().get("authToken")?.value;
-  const session = token ? await verifyAndDecodeToken(token) : null;
-
-  // Handle authentication logic
-  if (!session && !isPublicRoute) {
-    // Redirect to login if no valid session and trying to access protected route
-    return NextResponse.redirect(new URL("/auth/login", request.url));
+  if (!token) {
+    // If no token, redirect to login
+    console.warn("middleware ::", requestDescription, "::", "🔒", "No token found");
+    return NextResponse.redirect(new URL(NavigationRoutes.LOGIN, request.url));
   }
-
-  // User is authenticated, allow access to protected routes
-  return NextResponse.next();
+  try {
+    const tokenPayload = await verifyJwt(token);
+    console.log("middleware ::", requestDescription, "::", "🔒", "Token verified", tokenPayload);
+    // If valid, continue to the requested route
+    return NextResponse.next();
+  } catch (err) {
+    // If invalid or expired, redirect to login
+    console.warn("middleware ::", requestDescription, "::", "🔒", "Failed to verify token", JSON.stringify(err));
+    return NextResponse.redirect(new URL(NavigationRoutes.LOGIN, request.url));
+  }
 }
 
 // Configure which routes should be processed by middleware

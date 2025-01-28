@@ -10,12 +10,21 @@ export enum NavigationRoutes {
   SUPPORT = "/support",
 }
 
+export enum ApiRoutes {
+  LOGIN = "/api/auth/login",
+  LOGOUT = "/api/auth/logout",
+  ME = "/api/auth/me",
+  CHECKPOINT = "/api/checkpoint",
+  EVENT = "/api/event",
+}
+
 export const getIsPublicRoute = (pathname: string) => {
   const publicRoutes = [
     NavigationRoutes.LOGIN,
     NavigationRoutes.SIGNUP,
     NavigationRoutes.LOGOUT,
     NavigationRoutes.HOME,
+    ApiRoutes.LOGIN,
   ];
   const isPublicRoute = publicRoutes.includes(pathname as NavigationRoutes);
   return isPublicRoute;

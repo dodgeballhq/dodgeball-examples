@@ -12,14 +12,6 @@ interface IClientData {
    * This structure will depend on the checkpoint being processed and the handling of the data on the backend
    */
   payload: Record<string, unknown>;
-  /** You can pass in a Session ID here, or set it on the backend in order to label the session
-   * with your own identifier
-   */
-  sessionId?: string;
-  /** You can pass in a User ID here, or set it on the backend in order to label the user
-   * with your own identifier
-   */
-  userId?: string;
 }
 
 /**
@@ -30,6 +22,12 @@ interface IClientData {
 export interface IClientVerification extends IClientData {
   /** Name of the checkpoint to be processed */
   checkpointName: string;
+  /** The source token to be used for the verification */
+  sourceToken: string | null;
+  /** (Optional) The session ID to be used for the verification */
+  sessionId?: string;
+  /** (Optional) The user ID to be used for the verification */
+  userId?: string;
 }
 
 export type IClientVerificationCallback = (verification: IVerification) => Promise<void>;
@@ -53,11 +51,6 @@ export interface IClientVerificationCallbacks {
 export interface IProcessClientVerification {
   /** Dodgeball Client SDK instance */
   dodgeball: DodgeballClient | null | undefined;
-  /** Internal API endpoint to use for processing the checkpoint
-   * Example: "https://api.mysite.com/handle-dodgeball-verification"
-   * Example (local): "api/checkpoint"
-   */
-  internalEndpoint: string;
   clientVerification: IClientVerification;
   callbacks: IClientVerificationCallbacks;
 }

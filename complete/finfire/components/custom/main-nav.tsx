@@ -3,8 +3,8 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { useUser } from "@/lib/api/users/use-user";
 import { getIsPublicRoute, NavigationRoutes } from "@/lib/navigation";
-import { useSession } from "@/lib/providers/session-provider";
 import { cn } from "@/lib/utils";
 import {
   Building2,
@@ -14,7 +14,7 @@ import {
   PanelLeftClose,
   PanelLeftOpen,
   SendHorizontal,
-  User
+  User,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -48,8 +48,8 @@ export function MainNav({}: MainNavProps) {
   const pathname = usePathname();
   const isPublicRoute = getIsPublicRoute(pathname);
   const isProfileSelected = pathname === "/profile";
-  const { session, sessionUser } = useSession();
-  if (!session) {
+  const { data: userData } = useUser();
+  if (!userData?.session) {
     return null;
   }
 
@@ -111,7 +111,7 @@ export function MainNav({}: MainNavProps) {
         ))}
       </nav>
 
-      {session?.user && (
+      {userData?.user && (
         <div className={cn("border-t", !isExpanded && "flex flex-col items-center")}>
           <Popover>
             <PopoverTrigger asChild>
@@ -126,8 +126,8 @@ export function MainNav({}: MainNavProps) {
                 </Avatar>
                 {isExpanded && (
                   <div className="flex flex-col min-w-0">
-                    <span className="font-medium truncate">{session?.user?.fullName}</span>
-                    <span className="text-xs text-muted-foreground truncate">{session?.user?.email}</span>
+                    <span className="font-medium truncate">{userData?.user?.fullName}</span>
+                    <span className="text-xs text-muted-foreground truncate">{userData?.user?.email}</span>
                   </div>
                 )}
               </div>
@@ -136,8 +136,8 @@ export function MainNav({}: MainNavProps) {
               <div className="flex flex-col gap-2">
                 {!isExpanded && (
                   <div className="mb-2 flex flex-col">
-                    <span className="font-medium truncate">{session?.user?.fullName}</span>
-                    <span className="text-xs text-muted-foreground truncate">{session?.user?.email}</span>
+                    <span className="font-medium truncate">{userData?.user?.fullName}</span>
+                    <span className="text-xs text-muted-foreground truncate">{userData?.user?.email}</span>
                   </div>
                 )}
                 <Link href="/profile" className="flex items-center gap-2 rounded-md p-2 hover:bg-accent">

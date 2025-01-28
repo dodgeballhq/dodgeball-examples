@@ -1,11 +1,8 @@
 "use client";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useSession } from "@/lib/providers/session-provider";
 
 export default function SupportPage() {
-  const { session, clearSession } = useSession();
-
   return (
     <Card>
       <CardHeader>

@@ -3,11 +3,11 @@
 import { Button } from "@/components/ui/button";
 import { toast } from "@/components/ui/use-toast";
 import { UpdateUserRequest } from "@/lib/api/users/types";
+import { useUser } from "@/lib/api/users/use-user";
 import { processDodgeballVerification } from "@/lib/dodgeball-extensions/client-helpers";
 import { IProcessClientVerification } from "@/lib/dodgeball-extensions/client-types";
 import { sharedEnv } from "@/lib/environment";
 import { useDodgeballProvider } from "@/lib/providers/dodgeball-provider";
-import { useSession } from "@/lib/providers/session-provider";
 import { IVerification, IVerificationError } from "@dodgeball/trust-sdk-client/dist/types/types";
 import { useState } from "react";
 
@@ -18,22 +18,22 @@ interface IdVerificationButtonProps {
 export const IdVerificationButton: React.FC<IdVerificationButtonProps> = ({ updateUser }) => {
   // Dodgeball State
   const [isVerifying, setIsVerifying] = useState(false);
-  const { dodgeball } = useDodgeballProvider();
-  const { session, sessionUser, refreshSession } = useSession();
+  const { dodgeball, sourceToken } = useDodgeballProvider();
+  const { data: userData, refetch: refetchUser, isLoading: isLoadingUser } = useUser();
+  const userId = userData?.user?.id;
+  if (!userData || !userId) return null;
 
   const handleVerifyId = async () => {
     setIsVerifying(true);
-    if (!sessionUser) return;
-
     const onApproved = async (verification: IVerification) => {
       console.log("Checkpoint approved", verification);
-      await updateUser(sessionUser.id, { isIdVerified: true });
+      await updateUser(userId, { isIdVerified: true });
       toast({
         title: "Success",
         description: "Your ID has been verified successfully",
         duration: 3000,
       });
-      await refreshSession();
+      await refetchUser();
       setIsVerifying(false);
     };
 
@@ -62,18 +62,18 @@ export const IdVerificationButton: React.FC<IdVerificationButtonProps> = ({ upda
     try {
       const params: IProcessClientVerification = {
         dodgeball,
-        internalEndpoint: "api/checkpoint",
         clientVerification: {
           checkpointName: "VERIFY_ID",
-          userId: sessionUser.id,
-          sessionId: session?.id,
+          sourceToken,
+          sessionId: userData?.session?.id,
+          userId: userData?.user?.id,
           payload: {
-            sessionUser: sessionUser,
+            sessionUser: userData,
             customer: {
-              firstName: sessionUser.firstName,
-              lastName: sessionUser.lastName,
-              primaryEmail: sessionUser.email,
-              primaryPhone: sessionUser.phone,
+              firstName: userData.user?.firstName,
+              lastName: userData.user?.lastName,
+              primaryEmail: userData.user?.email,
+              primaryPhone: userData.user?.phone ?? null,
             },
           },
         },
@@ -83,8 +83,7 @@ export const IdVerificationButton: React.FC<IdVerificationButtonProps> = ({ upda
           onError,
         },
       };
-      const checkpointResult = await processDodgeballVerification(params);
-      console.log("Checkpoint result", checkpointResult);
+      await processDodgeballVerification(params);
     } catch (error) {
       console.error("Error verifying ID:", error);
       toast({
@@ -98,16 +97,16 @@ export const IdVerificationButton: React.FC<IdVerificationButtonProps> = ({ upda
   };
 
   const handleResetVerification = async () => {
-    if (!sessionUser) return;
+    if (!userData) return;
 
     try {
-      await updateUser(sessionUser.id, { isIdVerified: false });
+      await updateUser(userId, { isIdVerified: false });
       toast({
         title: "Success",
         description: "Your verification has been reset",
         duration: 3000,
       });
-      await refreshSession();
+      await refetchUser();
     } catch (error) {
       console.error("Error resetting verification:", error);
       toast({
@@ -127,12 +126,12 @@ export const IdVerificationButton: React.FC<IdVerificationButtonProps> = ({ upda
     );
   }
 
-  if (!sessionUser) return null;
+  if (!userData) return null;
 
-  if (!sessionUser.isIdVerified) {
+  if (!userData.user?.isIdVerified) {
     return (
       <div className="flex flex-col gap-2">
-        <Button variant="default" size="sm" onClick={handleVerifyId} disabled={isVerifying}>
+        <Button variant="default" size="sm" onClick={handleVerifyId} disabled={isVerifying || isLoadingUser}>
           Verify your Identity
         </Button>
         <div className="text-sm text-gray-500">This will allow you to make transactions</div>

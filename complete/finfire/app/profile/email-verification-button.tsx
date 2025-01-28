@@ -3,11 +3,11 @@
 import { Button } from "@/components/ui/button";
 import { toast } from "@/components/ui/use-toast";
 import { UpdateUserRequest } from "@/lib/api/users/types";
+import { useUser } from "@/lib/api/users/use-user";
 import { processDodgeballVerification } from "@/lib/dodgeball-extensions/client-helpers";
 import { IProcessClientVerification } from "@/lib/dodgeball-extensions/client-types";
 import { sharedEnv } from "@/lib/environment";
 import { useDodgeballProvider } from "@/lib/providers/dodgeball-provider";
-import { useSession } from "@/lib/providers/session-provider";
 import { IVerification, IVerificationError } from "@dodgeball/trust-sdk-client/dist/types/types";
 import { useState } from "react";
 
@@ -18,22 +18,24 @@ interface EmailVerificationButtonProps {
 export const EmailVerificationButton: React.FC<EmailVerificationButtonProps> = ({ updateUser }) => {
   // Dodgeball State
   const [isVerifying, setIsVerifying] = useState(false);
-  const { dodgeball } = useDodgeballProvider();
-  const { session, sessionUser, refreshSession } = useSession();
+  const { dodgeball, sourceToken } = useDodgeballProvider();
+  const { data: userData, refetch: refetchUser, isLoading: isLoadingUser } = useUser();
+
+  const userId = userData?.user?.id;
+  if (!userData || !userId) return null;
 
   const handleVerify = async () => {
     setIsVerifying(true);
-    if (!sessionUser) return;
 
     const onApproved = async (verification: IVerification) => {
       console.log("Checkpoint approved", verification);
-      await updateUser(sessionUser.id, { isEmailVerified: true });
+      await updateUser(userId, { isEmailVerified: true });
       toast({
         title: "Success",
         description: "Your email has been verified successfully",
         duration: 3000,
       });
-      await refreshSession();
+      await refetchUser();
       setIsVerifying(false);
     };
 
@@ -62,21 +64,21 @@ export const EmailVerificationButton: React.FC<EmailVerificationButtonProps> = (
     try {
       const params: IProcessClientVerification = {
         dodgeball,
-        internalEndpoint: "api/checkpoint",
         clientVerification: {
           checkpointName: "VERIFY_EMAIL",
-          userId: sessionUser.id,
-          sessionId: session?.id,
+          sourceToken,
+          sessionId: userData?.session?.id,
+          userId: userData?.user?.id,
           payload: {
-            sessionUser: sessionUser,
+            sessionUser: userData,
             mfa: {
-              emailAddresses: sessionUser.email,
+              emailAddresses: userData.user?.email,
             },
             customer: {
-              firstName: sessionUser.firstName,
-              lastName: sessionUser.lastName,
-              primaryEmail: sessionUser.email,
-              primaryPhone: sessionUser.phone,
+              firstName: userData.user?.firstName,
+              lastName: userData.user?.lastName,
+              primaryEmail: userData.user?.email,
+              primaryPhone: userData.user?.phone ?? null,
             },
           },
         },
@@ -86,8 +88,7 @@ export const EmailVerificationButton: React.FC<EmailVerificationButtonProps> = (
           onError,
         },
       };
-      const checkpointResult = await processDodgeballVerification(params);
-      console.log("Checkpoint result", checkpointResult);
+      await processDodgeballVerification(params);
     } catch (error) {
       console.error("Error verifying email:", error);
       toast({
@@ -101,16 +102,16 @@ export const EmailVerificationButton: React.FC<EmailVerificationButtonProps> = (
   };
 
   const handleResetVerification = async () => {
-    if (!sessionUser) return;
+    if (!userData) return;
 
     try {
-      await updateUser(sessionUser.id, { isEmailVerified: false });
+      await updateUser(userId, { isEmailVerified: false });
       toast({
         title: "Success",
         description: "Your email verification has been reset",
         duration: 3000,
       });
-      await refreshSession();
+      await refetchUser();
     } catch (error) {
       console.error("Error resetting email verification:", error);
       toast({
@@ -130,12 +131,12 @@ export const EmailVerificationButton: React.FC<EmailVerificationButtonProps> = (
     );
   }
 
-  if (!sessionUser) return null;
+  if (!userData) return null;
 
-  if (!sessionUser.isEmailVerified) {
+  if (!userData.user?.isEmailVerified) {
     return (
       <div className="flex flex-col gap-2">
-        <Button variant="default" size="sm" onClick={handleVerify} disabled={isVerifying}>
+        <Button variant="default" size="sm" onClick={handleVerify} disabled={isVerifying || isLoadingUser}>
           Verify your Email
         </Button>
         <div className="text-sm text-gray-500">This is important to secure your account</div>

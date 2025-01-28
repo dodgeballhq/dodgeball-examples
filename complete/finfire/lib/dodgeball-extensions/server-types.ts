@@ -12,20 +12,21 @@ export interface IExecuteServerCheckpointRequest {
    */
   payload: Record<string, unknown>;
   /**
-   * You can pass in a Session ID here, or set it on the backend in order to label the session
-   * with your own identifier
-   */
-  sessionId?: string;
-  /**
-   * You can pass in a User ID here, or set it on the backend in order to label the user
-   * with your own identifier
-   */
-  userId?: string;
-  /**
    * Obtained from the Dodgeball Client SDK, represents the device making the request.
    * Source Tokens can only be used if they were recently generated as they expire
    */
   sourceToken?: string;
+  /**
+   * Optional session ID to use for the checkpoint.
+   */
+  sessionId?: string;
+  /** Optional user ID to use for the checkpoint. */
+  userId?: string;
+  /**
+   * Optional IP address of the client making the request
+   * This is used to track the IP address of the client making the request
+   */
+  clientIpAddress?: string;
   /**
    * The verification ID to use for the checkpoint.
    * This is used when there are multiple verifications for a checkpoint.
@@ -47,5 +48,29 @@ export interface IExecuteServerCheckpointResult {
    */
   verification: IVerification | null;
   /** An error message if the checkpoint failed */
+  errorMessage?: string;
+}
+
+export interface IExecuteServerEventRequest {
+  /** The name of the event to be processed */
+  eventName: string;
+  /**
+   * Data sent from the client side to the server.
+   * This structure will depend on the event being processed and the handling of the data on the backend
+   */
+  payload: Record<string, unknown>;
+  /**
+   * The source token to use for the event.
+   * This is used when there are multiple devices for a user.
+   */
+  sourceToken?: string;
+  /** Optional session ID to use for the event. */
+  sessionId?: string;
+  /** Optional user ID to use for the event. */
+  userId?: string;
+}
+
+export interface IExecuteServerEventResult {
+  success: boolean;
   errorMessage?: string;
 }

@@ -1,6 +1,6 @@
+import { hashPassword } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { User } from "@prisma/client";
-import bcrypt from "bcryptjs";
 import { CreateUserRequest, UpdateUserRequest, updateUserRequestSchema, UserResponse } from "./types";
 
 export class UsersService {
@@ -22,12 +22,13 @@ export class UsersService {
       isEmailVerified: user.isEmailVerified,
       isPhoneVerified: user.isPhoneVerified,
       balance: user.balance,
-      createdAt: user.createdAt,
-      updatedAt: user.updatedAt,
+      createdAt: user.createdAt.toISOString(),
+      updatedAt: user.updatedAt.toISOString(),
     };
   }
 
   static async getUserById(id: string): Promise<UserResponse | null> {
+    console.log("Getting user by id", id);
     const user = await prisma.user.findUnique({
       where: { id },
     });
@@ -84,7 +85,7 @@ export class UsersService {
       throw new Error("User already exists");
     }
 
-    const hashedPassword = await bcrypt.hashSync(password, 10);
+    const hashedPassword = hashPassword(password);
 
     const user = await prisma.user.create({
       data: {
