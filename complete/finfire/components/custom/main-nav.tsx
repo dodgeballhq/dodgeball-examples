@@ -7,6 +7,7 @@ import { useUser } from "@/lib/api/users/use-user";
 import { getIsPublicRoute, NavigationRoutes } from "@/lib/navigation";
 import { cn } from "@/lib/utils";
 import {
+  Activity,
   Building2,
   HelpCircle,
   LayoutDashboard,
@@ -29,7 +30,7 @@ interface NavItem {
 
 const navItems: NavItem[] = [
   { title: "Dashboard", href: NavigationRoutes.DASHBOARD, icon: <LayoutDashboard className="h-5 w-5" /> },
-  // { title: "Activity", href: "/activity", icon: <Activity className="h-5 w-5" /> },
+  { title: "Activity", href: NavigationRoutes.TRANSACTIONS, icon: <Activity className="h-5 w-5" /> },
   // { title: "Add Money", href: NavigationRoutes.NEW_TRANSACTION, icon: <PlusCircle className="h-5 w-5" /> },
   { title: "Move Money", href: NavigationRoutes.NEW_TRANSACTION, icon: <SendHorizontal className="h-5 w-5" /> },
   { title: "Account Info", href: NavigationRoutes.PROFILE, icon: <Building2 className="h-5 w-5" /> },

@@ -16,6 +16,9 @@ export enum ApiRoutes {
   ME = "/api/auth/me",
   CHECKPOINT = "/api/checkpoint",
   EVENT = "/api/event",
+  TRANSACTIONS = "/api/transactions",
+  TRANSACTION_CREATE = "/api/transactions/create",
+  BALANCES = "/api/balances",
 }
 
 export const getIsPublicRoute = (pathname: string) => {

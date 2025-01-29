@@ -1,5 +1,14 @@
-import { Transaction } from "@prisma/client";
+
+export interface TransactionResponse {
+  id: string;
+  amount: number;
+  description: string;
+  toDescription: string;
+  fromDescription: string;
+  currency: string;
+  createdAt: string;
+}
 
 export interface TransactionsResponse {
-  transactions: Transaction[];
+  transactions: TransactionResponse[];
 }

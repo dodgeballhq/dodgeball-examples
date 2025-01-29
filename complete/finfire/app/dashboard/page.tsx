@@ -5,29 +5,25 @@ import { IdVerificationBadge } from "@/components/custom/reusable/id-verificatio
 import { PhoneVerificationBadge } from "@/components/custom/reusable/phone-verification-badge.tsx";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { TransactionsService } from "@/lib/api/transactions/service";
-import { useUser } from "@/lib/api/users/use-user";
-import { Transaction } from "@prisma/client";
+import { useBalances, useUser } from "@/lib/api/users/use-user";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import TransactionsCard from "../transactions/transactions-card";
 
 export default function Dashboard() {
-  const [userTransactions, setUserTransactions] = useState<Transaction[]>([]);
   const { data: userData } = useUser();
+  const { data: balances } = useBalances();
 
-  useEffect(() => {
-    const updateData = async () => {
-      const authenticatedUserId = userData?.user?.id;
-      let transactionsToSet: Transaction[] = [];
-      if (authenticatedUserId) {
-        transactionsToSet = await TransactionsService.getTransactions(authenticatedUserId);
-      }
-      setUserTransactions(transactionsToSet);
-    };
-    updateData();
-  }, [userData]);
-
+  const renderAvailableBalances = () => {
+    if (!balances) return null;
+    for (const [currency, balance] of Object.entries(balances)) {
+      return (
+        <div className="flex justify-between items-center font-bold text-3xl" key={`balance-${currency}`}>
+          <p>{balance} {currency}</p>
+        </div>
+      )
+    }
+    return null;
+  };
   return (
     <div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
@@ -65,8 +61,8 @@ export default function Dashboard() {
           </CardHeader>
           <CardContent>
             <div className="flex flex-col gap-2">
-              <p className="text-3xl font-bold">${userData?.user?.balance?.toFixed(2)}</p>
-              <p className="text-muted-foreground">Available Balance</p>
+              {renderAvailableBalances()}
+              <p className="text-muted-foreground">Available Balances</p>
             </div>
           </CardContent>
           <CardFooter>
@@ -78,39 +74,7 @@ export default function Dashboard() {
           </CardFooter>
         </Card>
       </div>
-      <Card>
-        <CardHeader>
-          <CardTitle>Recent Transactions</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Date</TableHead>
-                <TableHead>Description</TableHead>
-                <TableHead>Amount</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {userTransactions.length > 0 ? (
-                userTransactions.map((transaction) => (
-                  <TableRow key={transaction.id}>
-                    <TableCell>{new Date(transaction.createdAt).toLocaleDateString()}</TableCell>
-                    <TableCell>{transaction.description}</TableCell>
-                    <TableCell>${transaction.amount.toFixed(2)}</TableCell>
-                  </TableRow>
-                ))
-              ) : (
-                <TableRow>
-                  <TableCell colSpan={3} className="text-center py-8 text-gray-500">
-                    No transactions yet
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
+      <TransactionsCard />
     </div>
   );
 }

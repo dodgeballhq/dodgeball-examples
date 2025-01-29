@@ -25,7 +25,6 @@ export interface UserResponse {
   isIdVerified: boolean;
   isEmailVerified: boolean;
   isPhoneVerified: boolean;
-  balance: number;
   createdAt: string;
   updatedAt: string;
 }

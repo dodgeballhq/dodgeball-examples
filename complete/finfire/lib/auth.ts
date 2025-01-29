@@ -2,10 +2,11 @@
 import bcrypt from "bcryptjs";
 import { SignJWT, jwtVerify } from "jose";
 import { nanoid } from "nanoid";
+import { NextRequest } from "next/server";
 import { serverEnv } from "./environment";
 import { ApiRoutes } from "./navigation";
 
-interface IJwtPayload {
+export interface IJwtPayload {
   userId: string;
   sessionId: string;
 }
@@ -75,6 +76,34 @@ export const authenticatedFetch = async ({ method, route, options = {} }: IAuthe
     },
   });
 };
+
+/**
+ * Get the authenticated user from the request to the API
+ *
+ * @param request - The request object.
+ * @returns The authenticated user jwt payload.
+ */
+export async function getApiAuthUser(request: NextRequest): Promise<IJwtPayload> {
+  const token = request.cookies.get("authToken")?.value;
+  if (!token) {
+    // no token
+    throw new Error("No token");
+  }
+
+  // verify the token
+  let payload;
+  try {
+    payload = await verifyJwt(token);
+  } catch (error) {
+    // invalid or expired token
+    throw new Error("Invalid or expired token");
+  }
+
+  if (isJwtPayload(payload)) {
+    return payload;
+  }
+  throw new Error("Invalid JWT payload");
+}
 
 export const logout = async () => {
   await authenticatedFetch({ route: ApiRoutes.LOGOUT, method: "POST" });

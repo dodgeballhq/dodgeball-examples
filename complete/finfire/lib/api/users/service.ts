@@ -9,7 +9,7 @@ export class UsersService {
     return nameParts.join(" ");
   }
 
-  static convertUserToUserResponse(user: User): UserResponse {
+  static async convertUserToUserResponse(user: User): Promise<UserResponse> {
     const fullName = UsersService.getFullName(user);
     return {
       id: user.id,
@@ -21,7 +21,6 @@ export class UsersService {
       isIdVerified: user.isIdVerified,
       isEmailVerified: user.isEmailVerified,
       isPhoneVerified: user.isPhoneVerified,
-      balance: user.balance,
       createdAt: user.createdAt.toISOString(),
       updatedAt: user.updatedAt.toISOString(),
     };

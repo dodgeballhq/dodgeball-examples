@@ -1,6 +1,6 @@
 import { UsersService } from "@/lib/api/users/service";
 import { UserResponse } from "@/lib/api/users/types";
-import { verifyJwt } from "@/lib/auth";
+import { getApiAuthUser, IJwtPayload } from "@/lib/auth";
 import { NextRequest, NextResponse } from "next/server";
 
 export interface IMeResponse {
@@ -12,18 +12,10 @@ export interface IMeResponse {
 
 export async function POST(request: NextRequest): Promise<NextResponse<IMeResponse>> {
   try {
-    const token = request.cookies.get("authToken")?.value;
-    if (!token) {
-      // no token
-      return NextResponse.json({ user: null, session: null }, { status: 200 });
-    }
-
-    // verify the token
-    let payload;
+    let payload: IJwtPayload;
     try {
-      payload = await verifyJwt(token);
+      payload = await getApiAuthUser(request);
     } catch (error) {
-      // invalid or expired token
       return NextResponse.json({ user: null, session: null }, { status: 200 });
     }
 
@@ -49,7 +41,6 @@ export async function POST(request: NextRequest): Promise<NextResponse<IMeRespon
         isEmailVerified: user.isEmailVerified,
         isPhoneVerified: user.isPhoneVerified,
         isIdVerified: user.isIdVerified,
-        balance: user.balance,
         createdAt: user.createdAt,
         updatedAt: user.updatedAt,
       },
