@@ -21,7 +21,6 @@ import {
   IProcessDodgeballServerEventResult,
 } from "./interfaces";
 
-
 // Initialize the SDK with your secret API key.
 const dodgeball = new Dodgeball(process.env.DODGEBALL_PRIVATE_API_KEY ?? "UNSET_PRIVATE_API_KEY", {
   apiVersion: DodgeballApiVersion.v1,
