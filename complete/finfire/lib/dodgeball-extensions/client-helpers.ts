@@ -1,3 +1,5 @@
+import { authenticatedFetch } from "../auth";
+import { ApiRoutes } from "../navigation";
 import { IProcessClientVerification, IVerification, IVerificationError } from "./client-types";
 import { IExecuteServerCheckpointRequest, IExecuteServerCheckpointResult } from "./server-types";
 
@@ -14,21 +16,28 @@ export const processDodgeballVerification = async (
   previousVerificationId?: string | null | undefined
 ): Promise<void> => {
   try {
-    const { dodgeball, internalEndpoint, clientVerification, callbacks } = clientParams;
+    const { dodgeball, clientVerification, callbacks } = clientParams;
     if (!dodgeball) {
       throw new Error("Dodgeball SDK not initialized");
     }
+
+    const clientIpAddress = await getClientIpAddress();
     const sourceToken = await dodgeball?.getSourceToken();
 
     // Create the Request to the our call Dodgeball via our Internal API
     const apiParams: IExecuteServerCheckpointRequest = {
       checkpointName: clientVerification.checkpointName,
       payload: clientVerification.payload,
-      sessionId: clientVerification.sessionId,
-      userId: clientVerification.userId,
+      clientIpAddress: clientIpAddress ?? undefined,
     };
     if (sourceToken) {
       apiParams.sourceToken = sourceToken;
+    }
+    if (clientVerification.sessionId) {
+      apiParams.sessionId = clientVerification.sessionId;
+    }
+    if (clientVerification.userId) {
+      apiParams.userId = clientVerification.userId;
     }
     if (previousVerificationId) {
       apiParams.verificationId = previousVerificationId;
@@ -44,7 +53,11 @@ export const processDodgeballVerification = async (
 
     // Call our Internal API to process the checkpoint
     // The returned object should contain a verification object
-    const endpointResponse = await fetch(internalEndpoint, fetchConfig);
+    const endpointResponse = await authenticatedFetch({
+      route: ApiRoutes.CHECKPOINT,
+      method: "POST",
+      options: fetchConfig,
+    });
     const responseData = (await endpointResponse.json()) as IExecuteServerCheckpointResult;
     console.log("Dodgeball response", responseData);
 
@@ -63,7 +76,6 @@ export const processDodgeballVerification = async (
         // Call recursively if an additional step is required
         const nextParams: IProcessClientVerification = {
           dodgeball: dodgeball,
-          internalEndpoint: internalEndpoint,
           clientVerification: clientVerification,
           callbacks: callbacks,
         };
@@ -91,7 +103,9 @@ export const processDodgeballVerification = async (
  * @param verification The verification object to get the custom message from
  * @returns The custom message, or null if no custom message is found
  */
-const getCustomMessageFromVerification = (verification: IVerification): string | null | Record<string, unknown> => {
+export const getCustomMessageFromVerification = (
+  verification: IVerification
+): string | null | Record<string, unknown> => {
   if (verification.stepData?.customMessage) {
     try {
       return JSON.parse(verification.stepData.customMessage) as Record<string, unknown>;
@@ -100,4 +114,19 @@ const getCustomMessageFromVerification = (verification: IVerification): string |
     }
   }
   return null;
+};
+
+/**
+ * Get the client's public IP address using an external service
+ * @returns Promise<string | null> The client's public IP address or null if failed
+ */
+export const getClientIpAddress = async (): Promise<string | null> => {
+  try {
+    const response = await fetch("https://api.ipify.org?format=json");
+    const data = (await response.json()) as { ip: string };
+    return data.ip;
+  } catch (error) {
+    console.error("Error fetching IP address:", error);
+    return null;
+  }
 };

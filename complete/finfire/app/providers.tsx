@@ -1,21 +1,23 @@
-"use client"
+"use client";
 
-import { ToastProvider } from '@/components/ui/toast';
-import { Toaster } from '@/components/ui/toaster';
-import { TooltipProvider } from '@/components/ui/tooltip';
+import { ToastProvider } from "@/components/ui/toast";
+import { Toaster } from "@/components/ui/toaster";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import { queryClient } from "@/lib/api/queryClient";
+import { clientEnv, sharedEnv } from "@/lib/environment";
 import { DodgeballProvider } from "@/lib/providers/dodgeball-provider";
-
+import { QueryClientProvider } from "@tanstack/react-query";
 export function Providers({ children }: { children: React.ReactNode }) {
-  const dodgeballPublicApiKey = process.env.NEXT_PUBLIC_DODGEBALL_PUBLIC_API_KEY ?? "UNSET_PUBLIC_API_KEY";
-  const dodgeballApiUrl = process.env.NEXT_PUBLIC_DODGEBALL_API_URL;
   return (
-    <TooltipProvider>
-      <ToastProvider>
-        <DodgeballProvider publicApiKey={dodgeballPublicApiKey} dodgeballApiUrl={dodgeballApiUrl}>
-          {children}
-          <Toaster />
-        </DodgeballProvider>
-      </ToastProvider>
-    </TooltipProvider>
-  )
+    <QueryClientProvider client={queryClient}>
+      <DodgeballProvider publicApiKey={clientEnv.dodgeball.publicApiKey} dodgeballApiUrl={sharedEnv.dodgeball.apiUrl}>
+        <TooltipProvider>
+          <ToastProvider>
+            {children}
+            <Toaster />
+          </ToastProvider>
+        </TooltipProvider>
+      </DodgeballProvider>
+    </QueryClientProvider>
+  );
 }

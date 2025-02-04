@@ -1,16 +1,17 @@
 import {
   IExecuteServerCheckpointRequest,
   IExecuteServerCheckpointResult,
+  IExecuteServerEventRequest,
+  IExecuteServerEventResult,
 } from "@/lib/dodgeball-extensions/server-types";
 import { IVerification } from "@dodgeball/trust-sdk-client/dist/types/types";
 import { Dodgeball, DodgeballApiVersion } from "@dodgeball/trust-sdk-server";
 import { ICheckpointOptions } from "@dodgeball/trust-sdk-server/dist/types/types";
-import * as dotenv from "dotenv";
-dotenv.config();
+import { serverEnv, sharedEnv } from "../environment";
 
 // Get environment variables
-const DODGEBALL_PRIVATE_API_KEY = process.env.DODGEBALL_PRIVATE_API_KEY ?? "";
-const DODGEBALL_API_URL = process.env.DODGEBALL_API_URL ?? "";
+const DODGEBALL_PRIVATE_API_KEY = serverEnv.dodgeball.privateApiKey;
+const DODGEBALL_API_URL = sharedEnv.dodgeball.apiUrl;
 
 // Validate environment variables at startup
 if (!DODGEBALL_PRIVATE_API_KEY || !DODGEBALL_API_URL) {
@@ -52,9 +53,9 @@ export const getErrorResponse = (errorMessage: string) => {
  */
 export const executeDodgeballCheckpoint = async (
   executionParams: IExecuteServerCheckpointRequest,
-  ipAddress: string
+  requestIpAddress: string
 ): Promise<IExecuteServerCheckpointResult> => {
-  const { checkpointName, payload, sourceToken, sessionId, userId, verificationId } = executionParams;
+  const { checkpointName, payload, sourceToken, verificationId, sessionId, userId } = executionParams;
   // Validate required parameters
   if (!checkpointName) {
     return getErrorResponse("Invalid checkpoint name");
@@ -64,12 +65,24 @@ export const executeDodgeballCheckpoint = async (
     return getErrorResponse("Dodgeball not properly configured");
   }
 
+  // Prefer the client IP address if provided, otherwise use the request IP address
+  let ipAddress = executionParams.clientIpAddress;
+  if (!ipAddress) {
+    ipAddress = requestIpAddress;
+  }
+
+  // If the IP address is a local IP address, set it to an empty string
+  const localIpAddresses = ["::1", "127.0.0.1"];
+  if (localIpAddresses.includes(ipAddress ?? "")) {
+    ipAddress = "";
+  }
+
   try {
     // Create the checkpoint payload
     const checkpointPayload: ICheckpointOptions = {
       checkpointName,
       event: {
-        ip: ipAddress?.trim() || "UNKNOWN_IP",
+        ip: ipAddress?.trim() || "",
         data: {
           ...(payload ?? {}),
           exampleValueFromBackendOnly: "EXAMPLE_VALUE",
@@ -124,5 +137,34 @@ export const executeDodgeballCheckpoint = async (
     // Handle errors
     const errorMessage = error instanceof Error ? error.message : "Error processing checkpoint request";
     return getErrorResponse(errorMessage);
+  }
+};
+
+export const executeDodgeballEvent = async (event: IExecuteServerEventRequest): Promise<IExecuteServerEventResult> => {
+  const { eventName, payload, sourceToken, userId, sessionId } = event;
+  console.log("Executing Dodgeball event", event);
+  try {
+    if (!dodgeball) {
+      throw new Error("Dodgeball not properly configured");
+    }
+    await dodgeball.event({
+      event: {
+        type: eventName,
+        data: payload,
+        eventTime: Date.now(),
+      },
+      sourceToken,
+      userId,
+      sessionId,
+    });
+    return {
+      success: true,
+    };
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : "Error processing event request";
+    return {
+      success: false,
+      errorMessage,
+    };
   }
 };
