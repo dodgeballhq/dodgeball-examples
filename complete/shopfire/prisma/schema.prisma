@@ -1,0 +1,49 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model User {
+  id                String          @id @default(uuid())
+  firstName         String
+  lastName          String
+  email             String          @unique
+  phone             String?         @unique
+  hashedPassword    String
+  isIdVerified      Boolean         @default(false)
+  isEmailVerified   Boolean         @default(false)
+  isPhoneVerified   Boolean         @default(false)
+  image             String?
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+  transactions      Transaction[]
+}
+
+model Transaction {
+  id          String   @id @default(uuid())
+  userId      String
+  amount      Float
+  currency    String
+  description String
+  reference   String
+  toDescription   String
+  fromDescription String
+  createdAt   DateTime @default(now())
+  user        User     @relation(fields: [userId], references: [id])
+}
+
+model Product {
+  id          String   @id @default(cuid())
+  name        String
+  price       String
+  description String
+  material    String
+  brand       String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
