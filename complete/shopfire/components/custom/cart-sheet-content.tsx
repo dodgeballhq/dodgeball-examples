@@ -1,28 +1,36 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { useCartStore } from "@/lib/cart-store";
-import { ShoppingCart } from "lucide-react";
+import { useProducts } from "@/lib/hooks/useProducts";
+import { NavigationRoutes } from "@/lib/navigation";
+import Link from "next/link";
+import { useMemo } from "react";
 
-export function CartSheet() {
+interface CartSheetContentProps {
+  onClose: () => void; 
+}
+
+export function CartSheetContent({ onClose }: CartSheetContentProps) {
   const { items, removeFromCart, updateQuantity } = useCartStore();
-  
-  // Calculate totals from items
-  const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);
-  const totalPrice = items.reduce(
-    (sum, item) => sum + (parseFloat(item.product.price) * item.quantity), 
+  const { data: products } = useProducts();
+
+  // Get full product details for cart items
+  const cartItems = useMemo(() => {
+    return items.map(item => ({
+      ...item,
+      product: products?.find(p => p.id === item.productId)
+    }));
+  }, [items, products]);
+
+  // Calculate totals using product data
+  const totalPrice = cartItems.reduce(
+    (sum, item) => sum + (parseFloat(item.product?.price || '0') * item.quantity), 
     0
   );
 
   return (
-    <Sheet>
-      <SheetTrigger asChild>
-        <Button variant="outline" className="gap-2">
-          <ShoppingCart className="h-4 w-4" />
-          <span>{totalItems}</span>
-        </Button>
-      </SheetTrigger>
       <SheetContent className="w-full sm:max-w-lg">
         <SheetHeader>
           <SheetTitle>Shopping Cart</SheetTitle>
@@ -34,11 +42,11 @@ export function CartSheet() {
             </div>
           ) : (
             <div className="flex flex-col gap-4">
-              {items.map((item) => (
+              {cartItems.map((item) => (
                 <div key={item.productId} className="flex items-center justify-between gap-4">
                   <div className="flex-1">
-                    <h4 className="font-medium">{item.product.name}</h4>
-                    <p className="text-sm text-muted-foreground">${item.product.price}</p>
+                    <h4 className="font-medium">{item.product?.name}</h4>
+                    <p className="text-sm text-muted-foreground">${item.product?.price}</p>
                   </div>
                   <div className="flex items-center gap-2">
                     <Button
@@ -71,12 +79,13 @@ export function CartSheet() {
                   <span>Total:</span>
                   <span>${totalPrice.toFixed(2)}</span>
                 </div>
-                <Button className="w-full mt-4">Checkout</Button>
+                <Button asChild className="w-full mt-4">
+                  <Link href={NavigationRoutes.CHECKOUT} onClick={onClose}>Checkout</Link>
+                </Button>
               </div>
             </div>
           )}
         </div>
       </SheetContent>
-    </Sheet>
   );
 } 

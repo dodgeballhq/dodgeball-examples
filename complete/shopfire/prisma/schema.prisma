@@ -37,12 +37,15 @@ model Transaction {
 }
 
 model Product {
-  id          String   @id @default(cuid())
+  id          String   @id @default(uuid())
   name        String
   price       String
   description String
   material    String
   brand       String
+  isDigital   Boolean  @default(false)
+  picture     String?
+  isRecurring Boolean  @default(false)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }

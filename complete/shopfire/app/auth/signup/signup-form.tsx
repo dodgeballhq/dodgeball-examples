@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { CardContent, CardFooter } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/use-toast";
+import { NavigationRoutes } from "@/lib/navigation";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -17,23 +18,23 @@ const SignupForm: React.FC<SignupFormProps> = ({ processSignup }) => {
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const toast = useToast();
+  const { toast } = useToast();
   const router = useRouter();
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
       await processSignup(firstName, lastName, email, password);
-      toast.toast({
+      toast({
         title: "Signup successful",
         description: "You can now login to your account",
         variant: "default",
       });
-      router.push("/auth/login");
+      router.push(NavigationRoutes.LOGIN);
     } catch (error) {
       console.error(error);
       const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
-      toast.toast({
+      toast({
         title: "Signup failed",
         description: errorMessage,
         variant: "destructive",

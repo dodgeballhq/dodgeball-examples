@@ -1,8 +1,9 @@
 "use client";
 
-import { Product, ProductCard } from "@/components/custom/product-card";
+import { ProductCard } from "@/components/custom/product-card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useCartStore } from "@/lib/cart-store";
+import { Product } from "@prisma/client";
 import { useQuery } from "@tanstack/react-query";
 
 const fetchProducts = async (): Promise<Product[]> => {
@@ -20,15 +21,15 @@ export default function HomePage() {
   const { addToCart } = useCartStore();
 
   const handleAddToCart = (productId: string, quantity: number) => {
-    // Implement your cart logic here (e.g., using context or API call)
-    console.log(`Adding ${quantity} of product ${productId} to cart`);
+    addToCart(productId, quantity);
   };
 
   if (error) return <div>Error loading products: {error.message}</div>;
 
   return (
     <div className="container mx-auto py-8">
-      <h1 className="text-3xl font-bold mb-8">Our Products</h1>
+      <h1 className="text-3xl font-bold mb-8">Welcome to ShopFire</h1>
+      <p className="mb-8">🔥🔥🔥 The one-stop shop when you have money to burn 🔥🔥🔥</p>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {isLoading ? (
           Array(6).fill(0).map((_, i) => (

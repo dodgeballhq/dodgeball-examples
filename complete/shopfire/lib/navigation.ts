@@ -6,6 +6,7 @@ export enum NavigationRoutes {
   SIGNUP = "/auth/signup",
   PROFILE = "/profile",
   SUPPORT = "/support",
+  CHECKOUT = "/checkout",
 }
 
 export enum ApiRoutes {

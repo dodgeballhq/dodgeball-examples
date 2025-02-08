@@ -9,7 +9,8 @@
     "lint": "next lint",
     "format": "prettier --write .",
     "prisma:generate": "prisma generate",
-    "prisma:migrate": "prisma migrate dev"
+    "prisma:migrate": "prisma migrate dev",
+    "prisma:seed": "prisma db seed"
   },
   "dependencies": {
     "@dodgeball/trust-sdk-client": "^0.0.38",
@@ -75,7 +76,7 @@
   "devDependencies": {
     "@types/bcryptjs": "^2.4.6",
     "@types/js-cookie": "^3.0.6",
-    "@types/node": "^22",
+    "@types/node": "^20.11.0",
     "@types/react": "^18",
     "@types/react-dom": "^18",
     "eslint": "^8",
@@ -84,6 +85,10 @@
     "prettier": "^3.4.2",
     "prisma": "^6.2.1",
     "tailwindcss": "^3.4.17",
-    "typescript": "^5"
+    "ts-node": "^10.9.2",
+    "typescript": "^5.3.3"
+  },
+  "prisma": {
+    "seed": "ts-node prisma/seed.ts"
   }
 }

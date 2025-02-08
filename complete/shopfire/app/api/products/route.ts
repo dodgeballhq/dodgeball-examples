@@ -10,7 +10,10 @@ export async function GET() {
         price: true,
         description: true,
         material: true,
-        brand: true
+        brand: true,
+        picture: true,
+        isRecurring: true,
+        isDigital: true
       }
     });
 

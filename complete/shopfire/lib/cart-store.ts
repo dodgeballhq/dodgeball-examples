@@ -1,16 +1,14 @@
-import { Product } from "@/components/custom/product-card";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
 interface CartItem {
   productId: string;
   quantity: number;
-  product: Pick<Product, "name" | "price" | "id">;
 }
 
 interface CartStore {
   items: CartItem[];
-  addToCart: (product: Product, quantity: number) => void;
+  addToCart: (productId: string, quantity: number) => void;
   removeFromCart: (productId: string) => void;
   updateQuantity: (productId: string, newQuantity: number) => void;
   clearCart: () => void;
@@ -20,13 +18,13 @@ export const useCartStore = create(
   persist<CartStore>(
     (set, get) => ({
       items: [],
-      addToCart: (product, quantity) => {
-        const existingItem = get().items.find(item => item.productId === product.id);
+      addToCart: (productId, quantity) => {
+        const existingItem = get().items.find(item => item.productId === productId);
         
         if (existingItem) {
           return set(state => ({
             items: state.items.map(item =>
-              item.productId === product.id
+              item.productId === productId
                 ? { ...item, quantity: item.quantity + quantity }
                 : item
             )
@@ -35,13 +33,8 @@ export const useCartStore = create(
 
         set(state => ({
           items: [...state.items, {
-            productId: product.id,
+            productId,
             quantity,
-            product: {
-              id: product.id,
-              name: product.name,
-              price: product.price
-            }
           }]
         }));
       },
@@ -64,7 +57,7 @@ export const useCartStore = create(
     }),
     {
       name: "cart-storage", // localStorage key
-      partialize: (state) => ({ items: state.items }), // Only persist items
+      partialize: (state) => ({ items: state.items }) as CartStore, // Only persist items
     }
   )
 ); 

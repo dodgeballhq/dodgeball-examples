@@ -1,6 +1,7 @@
-import { CartSheet } from "@/components/custom/cart-sheet";
 import { MainNav } from "@/components/custom/main-nav";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import type { Metadata } from "next";
+import { Toaster } from "sonner";
 import "./globals.css";
 import { Providers } from "./providers";
 
@@ -25,16 +26,14 @@ export default function RootLayout({
             <MainNav />
             <main className="flex-1">
               <div className="min-h-screen bg-gradient-to-b from-gray-100 to-gray-200 p-8">
-                <div className="max-w-4xl mx-auto">
-                  <div className="flex justify-end mb-4">
-                    <CartSheet />
-                  </div>
-                  {children}
-                </div>
+                <ScrollArea className="h-[calc(100vh-4rem)]">
+                  <div className="max-w-4xl mx-auto">{children}</div>
+                </ScrollArea>
               </div>
             </main>
           </div>
         </Providers>
+        <Toaster position="top-center" richColors />
       </body>
     </html>
   );

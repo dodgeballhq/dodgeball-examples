@@ -42,7 +42,7 @@ export interface IExecuteServerCheckpointResult {
   /** The status of the checkpoint execution
    * You can use any status here, but we have provided some simple options below
    */
-  status: "isAllowed" | "isRunning" | "isDenied" | "isError" | string;
+  status: "isAllowed" | "isRunning" | "isDenied" | "isError";
   /** The verification object returned from the checkpoint
    * This contains information about the verification
    */

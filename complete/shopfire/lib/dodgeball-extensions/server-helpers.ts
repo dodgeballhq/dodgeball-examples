@@ -32,14 +32,11 @@ const dodgeball =
  * @param errorMessage - The error message to include in the response
  * @returns The error response
  */
-export const getErrorResponse = (errorMessage: string) => {
-  const baseErrorResponse = {
+export const getErrorResponse = (errorMessage: string): IExecuteServerCheckpointResult => {
+  return {
     success: false,
     status: "isError",
     verification: null,
-  };
-  return {
-    ...baseErrorResponse,
     errorMessage,
   };
 };

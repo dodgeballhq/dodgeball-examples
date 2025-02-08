@@ -72,6 +72,7 @@ const reactQueryBestPractices = [
 // Additional instructions
 
 const additionalInstructions = `
+
 1. Use TypeScript for type safety with React Query
 2. Implement proper error boundaries for query errors
 3. Utilize React Query DevTools for debugging
@@ -80,3 +81,6 @@ const additionalInstructions = `
 6. Use query invalidation for data refetching
 7. Follow React Query naming conventions for consistency
 `;
+
+Use yarn as my package manager
+Use Prisma as my ORM
