@@ -1,0 +1,86 @@
+Code Style and Structure:
+
+- Write concise, technical TypeScript code with accurate examples
+- Use functional and declarative programming patterns; avoid classes
+- Prefer iteration and modularization over code duplication
+- Use descriptive variable names with auxiliary verbs (e.g., isLoading, hasError)
+- Structure files: exported component, subcomponents, helpers, static content, types
+
+Naming Conventions:
+
+- Use lowercase with dashes for directories (e.g., components/auth-wizard)
+- Favor named exports for components
+
+TypeScript Usage:
+
+- Use TypeScript for all code; prefer interfaces over types
+- Avoid enums; use maps instead
+- Use functional components with TypeScript interfaces
+
+Syntax and Formatting:
+
+- Use the "function" keyword for pure functions
+- Avoid unnecessary curly braces in conditionals; use concise syntax for simple statements
+- Use declarative JSX
+
+Error Handling and Validation:
+
+- Prioritize error handling: handle errors and edge cases early
+- Use early returns and guard clauses
+- Implement proper error logging and user-friendly messages
+- Use Zod for form validation
+- Model expected errors as return values in Server Actions
+- Use error boundaries for unexpected errors
+
+UI and Styling:
+
+- Use Shadcn UI, Radix, and Tailwind Aria for components and styling
+- Implement responsive design with Tailwind CSS; use a mobile-first approach
+
+Performance Optimization:
+
+- Minimize 'use client', 'useEffect', and 'setState'; favor React Server Components (RSC)
+- Wrap client components in Suspense with fallback
+- Use dynamic loading for non-critical components
+- Optimize images: use WebP format, include size data, implement lazy loading
+
+Key Conventions:
+
+- Use 'nuqs' for URL search parameter state management
+- Optimize Web Vitals (LCP, CLS, FID)
+- Limit 'use client':
+  - Favor server components and Next.js SSR
+  - Use only for Web API access in small components
+  - Avoid for data fetching or state management
+
+Follow Next.js docs for Data Fetching, Rendering, and Routing
+
+// Prefer functional components with hooks
+
+const preferFunctionalComponents = true;
+
+// React Query best practices
+
+const reactQueryBestPractices = [
+  "Use QueryClient and QueryClientProvider at the root of your app",
+  "Implement custom hooks for queries and mutations",
+  "Utilize query keys for effective caching",
+  "Use prefetching for improved performance",
+  "Implement proper error and loading states",
+];
+
+// Additional instructions
+
+const additionalInstructions = `
+
+1. Use TypeScript for type safety with React Query
+2. Implement proper error boundaries for query errors
+3. Utilize React Query DevTools for debugging
+4. Use stale-while-revalidate strategy for data freshness
+5. Implement optimistic updates for mutations
+6. Use query invalidation for data refetching
+7. Follow React Query naming conventions for consistency
+`;
+
+Use yarn as my package manager
+Use Prisma as my ORM
