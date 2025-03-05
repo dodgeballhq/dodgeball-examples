@@ -19,38 +19,35 @@ export const useCartStore = create(
     (set, get) => ({
       items: [],
       addToCart: (productId, quantity) => {
-        const existingItem = get().items.find(item => item.productId === productId);
-        
+        const existingItem = get().items.find((item) => item.productId === productId);
+
         if (existingItem) {
-          return set(state => ({
-            items: state.items.map(item =>
-              item.productId === productId
-                ? { ...item, quantity: item.quantity + quantity }
-                : item
-            )
+          return set((state) => ({
+            items: state.items.map((item) =>
+              item.productId === productId ? { ...item, quantity: item.quantity + quantity } : item
+            ),
           }));
         }
 
-        set(state => ({
-          items: [...state.items, {
-            productId,
-            quantity,
-          }]
+        set((state) => ({
+          items: [
+            ...state.items,
+            {
+              productId,
+              quantity,
+            },
+          ],
         }));
       },
       removeFromCart: (productId) => {
-        set(state => ({
-          items: state.items.filter(item => item.productId !== productId)
+        set((state) => ({
+          items: state.items.filter((item) => item.productId !== productId),
         }));
       },
       updateQuantity: (productId, newQuantity) => {
         if (newQuantity < 1) return;
-        set(state => ({
-          items: state.items.map(item =>
-            item.productId === productId
-              ? { ...item, quantity: newQuantity }
-              : item
-          )
+        set((state) => ({
+          items: state.items.map((item) => (item.productId === productId ? { ...item, quantity: newQuantity } : item)),
         }));
       },
       clearCart: () => set({ items: [] }),
@@ -60,4 +57,4 @@ export const useCartStore = create(
       partialize: (state) => ({ items: state.items }) as CartStore, // Only persist items
     }
   )
-); 
+);

@@ -35,14 +35,19 @@ interface FailedApplyPromoCodeResponse {
 
 export type ApplyPromoCodeResponse = SuccessApplyPromoCodeResponse | FailedApplyPromoCodeResponse;
 
-export async function handleApplyPromoCode(promoCode: string, sourceToken: string, authPayload: IJwtPayload | null, requestIp: string): Promise<PromoCodeDiscount> {
+export async function handleApplyPromoCode(
+  promoCode: string,
+  sourceToken: string,
+  authPayload: IJwtPayload | null,
+  requestIp: string
+): Promise<PromoCodeDiscount> {
   const promoCodeDiscount = validPromos[promoCode];
   if (!promoCodeDiscount) {
     throw new Error("Invalid promo code");
   }
   const executeParams: IExecuteServerCheckpointRequest = {
-  checkpointName: "APPLY_PROMO",
-  payload: {
+    checkpointName: "APPLY_PROMO",
+    payload: {
       promoCode,
       promoType: validPromos[promoCode].category,
     },
@@ -52,7 +57,7 @@ export async function handleApplyPromoCode(promoCode: string, sourceToken: strin
   };
 
   const executionResult = await executeDodgeballCheckpoint(executeParams, requestIp);
-  
+
   if (executionResult.status === "isAllowed") {
     return promoCodeDiscount;
   }
@@ -91,4 +96,4 @@ export async function POST(req: NextRequest): Promise<NextResponse<ApplyPromoCod
     const errorMessage = error instanceof Error ? error.message : "Unable to apply promo code";
     return NextResponse.json({ success: false, error: errorMessage }, { status: 200 });
   }
-} 
+}

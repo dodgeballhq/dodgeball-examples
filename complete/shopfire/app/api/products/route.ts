@@ -13,16 +13,13 @@ export async function GET() {
         brand: true,
         picture: true,
         isRecurring: true,
-        isDigital: true
-      }
+        isDigital: true,
+      },
     });
 
     return NextResponse.json(products);
   } catch (error) {
     console.error("Error fetching products:", error);
-    return NextResponse.json(
-      { error: "Failed to fetch products" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Failed to fetch products" }, { status: 500 });
   }
-} 
+}

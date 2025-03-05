@@ -20,43 +20,45 @@ import { PromoCodeDiscount } from "../api/promo-code/apply/route";
 
 // Add validation schemas
 const promoCodeSchema = z.object({
-  promoCode: z.string().min(1, "Please enter a promo code")
+  promoCode: z.string().min(1, "Please enter a promo code"),
 });
 
-const checkoutSchema = z.object({
-  shippingAddressFirstName: z.string().min(1, "First name is required"),
-  shippingAddressLastName: z.string().min(1, "Last name is required"),
-  shippingAddress: z.string().min(1, "Address is required"),
-  shippingAddress2: z.string().optional(),
-  shippingPostalCode: z.string().min(1, "Postal code is required"),
-  cardNumber: z.string().min(13, "Invalid card number"),
-  expiration: z.string().regex(/^(0[1-9]|1[0-2])\/?([0-9]{2})$/, "Invalid expiration date"),
-  cvc: z.string().min(3, "CVC must be at least 3 digits").max(4, "CVC cannot be more than 4 digits"),
-  name: z.string().min(1, "Cardholder name is required"),
-  sameAsShipping: z.boolean(),
-  billingAddressFirstName: z.string().optional(),
-  billingAddressLastName: z.string().optional(),
-  billingAddress: z.string().optional(),
-  billingAddress2: z.string().optional(),
-  billingPostalCode: z.string().optional(),
-}).superRefine((data, ctx) => {
-  if (!data.sameAsShipping) {
-    if (!data.billingAddress) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: "Billing address is required",
-        path: ["billingAddress"]
-      });
+const checkoutSchema = z
+  .object({
+    shippingAddressFirstName: z.string().min(1, "First name is required"),
+    shippingAddressLastName: z.string().min(1, "Last name is required"),
+    shippingAddress: z.string().min(1, "Address is required"),
+    shippingAddress2: z.string().optional(),
+    shippingPostalCode: z.string().min(1, "Postal code is required"),
+    cardNumber: z.string().min(13, "Invalid card number"),
+    expiration: z.string().regex(/^(0[1-9]|1[0-2])\/?([0-9]{2})$/, "Invalid expiration date"),
+    cvc: z.string().min(3, "CVC must be at least 3 digits").max(4, "CVC cannot be more than 4 digits"),
+    name: z.string().min(1, "Cardholder name is required"),
+    sameAsShipping: z.boolean(),
+    billingAddressFirstName: z.string().optional(),
+    billingAddressLastName: z.string().optional(),
+    billingAddress: z.string().optional(),
+    billingAddress2: z.string().optional(),
+    billingPostalCode: z.string().optional(),
+  })
+  .superRefine((data, ctx) => {
+    if (!data.sameAsShipping) {
+      if (!data.billingAddress) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Billing address is required",
+          path: ["billingAddress"],
+        });
+      }
+      if (!data.billingPostalCode) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Billing Postal code is required",
+          path: ["billingPostalCode"],
+        });
+      }
     }
-    if (!data.billingPostalCode) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: "Billing Postal code is required",
-        path: ["billingPostalCode"]
-      });
-    }
-  }
-});
+  });
 
 export default function CheckoutPage() {
   const [discount, setDiscount] = useState<PromoCodeDiscount | null>(null);
@@ -66,11 +68,63 @@ export default function CheckoutPage() {
   const { data: products } = useProducts();
   const [isProcessing, setIsProcessing] = useState(false);
 
+  const handleSimulateCardDecline = async () => {
+    try {
+      if (!sourceToken) {
+        throw new Error("No source token available");
+      }
+
+      const response = await fetch("/api/event", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          eventName: "CARD_DECLINED",
+          payload: {
+            amount: totalPrice,
+            currency: "USD",
+            reason: "simulated_decline",
+            orderedFromDomain: "https://shopfire.dodgeballhq.com",
+            lineItems: cartItems.map((item) => ({
+              unitAmount: parseFloat(item.product?.price || "0") * 100,
+              numUnits: item.quantity,
+              product: {
+                externalId: item.productId,
+                name: item.product?.name,
+                description: item.product?.description,
+                brand: item.product?.brand,
+              },
+            })),
+          },
+          sourceToken,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to simulate card decline");
+      }
+
+      toast({
+        title: "Card Declined",
+        description: "Card decline event simulated successfully",
+        variant: "default",
+      });
+    } catch (error) {
+      console.error("Error simulating card decline:", error);
+      toast({
+        title: "Error",
+        description: "Failed to simulate card decline",
+        variant: "destructive",
+      });
+    }
+  };
+
   // Merge cart items with product data
   const cartItems = useMemo(() => {
-    return items.map(item => ({
+    return items.map((item) => ({
       ...item,
-      product: products?.find(p => p.id === item.productId)
+      product: products?.find((p) => p.id === item.productId),
     }));
   }, [items, products]);
 
@@ -79,10 +133,10 @@ export default function CheckoutPage() {
       return (discount.percentage / 100) * totalPrice;
     }
     return discount.amount;
-  }
+  };
 
   const initialTotalPrice = cartItems.reduce(
-    (sum, item) => sum + (parseFloat(item.product?.price || '0') * item.quantity),
+    (sum, item) => sum + parseFloat(item.product?.price || "0") * item.quantity,
     0
   );
 
@@ -93,7 +147,7 @@ export default function CheckoutPage() {
   // Promo code form
   const promoCodeForm = useForm<z.infer<typeof promoCodeSchema>>({
     resolver: zodResolver(promoCodeSchema),
-    defaultValues: { promoCode: "" }
+    defaultValues: { promoCode: "" },
   });
 
   // Checkout form
@@ -114,22 +168,22 @@ export default function CheckoutPage() {
       billingAddressLastName: "",
       billingAddress: "",
       billingAddress2: "",
-      billingPostalCode: ""
-    }
+      billingPostalCode: "",
+    },
   });
 
   async function onPromoCodeSubmit(values: z.infer<typeof promoCodeSchema>) {
     try {
       setDiscount(null);
-      const response = await fetch('/api/promo-code/apply', {
-        method: 'POST',
+      const response = await fetch("/api/promo-code/apply", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json'
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           promoCode: values.promoCode,
           sourceToken,
-        })
+        }),
       });
 
       if (!response.ok) {
@@ -142,22 +196,22 @@ export default function CheckoutPage() {
         toast({
           title: `${responseData.discount.code} discount applied!`,
           description: "Promo code applied successfully",
-          variant: "default"
+          variant: "default",
         });
         promoCodeForm.reset();
       } else {
         toast({
           title: "Failed to apply promo code",
           description: responseData.error,
-          variant: "destructive"
+          variant: "destructive",
         });
       }
     } catch (error) {
-      console.error('Promo code error:', error);
+      console.error("Promo code error:", error);
       toast({
         title: "Failed to apply promo code",
         description: "Please try again",
-        variant: "destructive"
+        variant: "destructive",
       });
     }
   }
@@ -166,7 +220,7 @@ export default function CheckoutPage() {
     console.log("onCheckoutSubmit", values);
     try {
       setIsProcessing(true);
-      
+
       let lineItems: ILineItem[] = [];
       for (const item of cartItems) {
         if (item.product) {
@@ -176,7 +230,7 @@ export default function CheckoutPage() {
             quantity: item.quantity,
             description: item.product?.description || "",
             brand: item.product?.brand || "",
-            unitPrice: parseFloat(item.product?.price || "0")
+            unitPrice: parseFloat(item.product?.price || "0"),
           });
         } else {
           throw new Error("Product not found");
@@ -187,15 +241,17 @@ export default function CheckoutPage() {
         lastName: values.shippingAddressLastName,
         line1: values.shippingAddress,
         line2: values.shippingAddress2 || null,
-        postalCode: values.shippingPostalCode
+        postalCode: values.shippingPostalCode,
       };
-      const billingAddress = values.sameAsShipping ? shippingAddress : {
-        firstName: values.billingAddressFirstName || "",
-        lastName: values.billingAddressLastName || "",
-        line1: values.billingAddress || "",
-        line2: values.billingAddress2 || null,
-        postalCode: values.billingPostalCode || ""
-      };
+      const billingAddress = values.sameAsShipping
+        ? shippingAddress
+        : {
+            firstName: values.billingAddressFirstName || "",
+            lastName: values.billingAddressLastName || "",
+            line1: values.billingAddress || "",
+            line2: values.billingAddress2 || null,
+            postalCode: values.billingPostalCode || "",
+          };
 
       const transaction: ITransaction = {
         externalId: `txn_${nanoid(16)}`, // Generate unique transaction ID
@@ -207,18 +263,18 @@ export default function CheckoutPage() {
         billingAddress,
         cardHolderName: values.name,
         cardBin: values.cardNumber.slice(0, 6), // First 6 digits
-        cardLast4: values.cardNumber.slice(-4) // Last 4 digits
+        cardLast4: values.cardNumber.slice(-4), // Last 4 digits
       };
 
-      const response = await fetch('/api/purchase/checkout', {
-        method: 'POST',
+      const response = await fetch("/api/purchase/checkout", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json'
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           transaction,
-          sourceToken
-        })
+          sourceToken,
+        }),
       });
 
       if (!response.ok) {
@@ -230,9 +286,9 @@ export default function CheckoutPage() {
         toast({
           title: "Order Successful!",
           description: "Your order has been processed",
-          variant: "default"
+          variant: "default",
         });
-        
+
         // Immediately clear cart and navigate
         await useCartStore.getState().clearCart();
         router.push(NavigationRoutes.HOME);
@@ -240,22 +296,22 @@ export default function CheckoutPage() {
         toast({
           title: "Order Failed",
           description: responseData.error,
-          variant: "destructive"
+          variant: "destructive",
         });
       }
     } catch (error) {
-      console.error('Checkout error:', error);
+      console.error("Checkout error:", error);
       let errorMessage = "Please try again";
       if (error instanceof Error) {
         errorMessage = error.message;
-      } else if (typeof error === 'string') {
+      } else if (typeof error === "string") {
         errorMessage = error;
       }
-      
+
       toast({
         title: "Order Error",
         description: errorMessage,
-        variant: "destructive"
+        variant: "destructive",
       });
     } finally {
       setIsProcessing(false);
@@ -268,15 +324,11 @@ export default function CheckoutPage() {
         {/* Header */}
         <div className="text-center space-y-2">
           <h1 className="text-3xl font-bold">Checkout</h1>
-          <p className="text-muted-foreground">
-            Complete your purchase securely
-          </p>
+          <p className="text-muted-foreground">Complete your purchase securely</p>
         </div>
 
         {items.length === 0 && (
-          <div className="flex h-full items-center justify-center text-muted-foreground">
-            Your cart is empty
-          </div>
+          <div className="flex h-full items-center justify-center text-muted-foreground">Your cart is empty</div>
         )}
 
         {items.length > 0 && (
@@ -292,12 +344,10 @@ export default function CheckoutPage() {
                   <div key={item.productId} className="flex justify-between items-center pb-4 border-b">
                     <div>
                       <h3 className="font-medium">{item.product?.name}</h3>
-                      <p className="text-sm text-muted-foreground">
-                        Quantity: {item.quantity}
-                      </p>
+                      <p className="text-sm text-muted-foreground">Quantity: {item.quantity}</p>
                     </div>
                     <div className="font-medium">
-                      ${(parseFloat(item.product?.price || '0') * item.quantity).toFixed(2)}
+                      ${(parseFloat(item.product?.price || "0") * item.quantity).toFixed(2)}
                     </div>
                   </div>
                 ))}
@@ -315,11 +365,7 @@ export default function CheckoutPage() {
                           <FormLabel className="text-base">Discount Code</FormLabel>
                           <div className="flex gap-2">
                             <FormControl>
-                              <Input
-                                placeholder="Enter promo code"
-                                className="flex-1"
-                                {...field}
-                              />
+                              <Input placeholder="Enter promo code" className="flex-1" {...field} />
                             </FormControl>
                             <div className="flex gap-2">
                               <Button type="submit" variant="outline">
@@ -352,9 +398,7 @@ export default function CheckoutPage() {
                       {discount?.type === "percentage" && (
                         <span className="text-muted-foreground">({discount.percentage}% off)</span>
                       )}
-                      {discount?.type === "fixed" && (
-                        <span className="text-muted-foreground">Fixed discount</span>
-                      )}
+                      {discount?.type === "fixed" && <span className="text-muted-foreground">Fixed discount</span>}
                     </div>
                     <span className="text-muted-foreground">-${discountAmount.toFixed(2)}</span>
                   </div>
@@ -363,9 +407,7 @@ export default function CheckoutPage() {
                 {/* Update total display */}
                 <div className="flex justify-between items-center pt-4 border-t">
                   <span className="text-lg font-semibold">Total</span>
-                  <span className="text-lg font-semibold">
-                    ${(totalPrice).toFixed(2)}
-                  </span>
+                  <span className="text-lg font-semibold">${totalPrice.toFixed(2)}</span>
                 </div>
               </div>
             </section>
@@ -382,12 +424,14 @@ export default function CheckoutPage() {
                         name="shippingAddressFirstName"
                         render={({ field }) => (
                           <FormItem className="space-y-2">
-                            <FormLabel className="text-base">First Name <span className="text-red-500">*</span></FormLabel>
+                            <FormLabel className="text-base">
+                              First Name <span className="text-red-500">*</span>
+                            </FormLabel>
                             <FormControl>
-                              <Input 
-                                {...field} 
-                                className="py-3 text-base" 
-                                required 
+                              <Input
+                                {...field}
+                                className="py-3 text-base"
+                                required
                                 aria-invalid={!!checkoutForm.formState.errors.shippingAddressFirstName}
                               />
                             </FormControl>
@@ -400,12 +444,14 @@ export default function CheckoutPage() {
                         name="shippingAddressLastName"
                         render={({ field }) => (
                           <FormItem className="space-y-2">
-                            <FormLabel className="text-base">Last Name <span className="text-red-500">*</span></FormLabel>
+                            <FormLabel className="text-base">
+                              Last Name <span className="text-red-500">*</span>
+                            </FormLabel>
                             <FormControl>
-                              <Input 
-                                {...field} 
-                                className="py-3 text-base" 
-                                required 
+                              <Input
+                                {...field}
+                                className="py-3 text-base"
+                                required
                                 aria-invalid={!!checkoutForm.formState.errors.shippingAddressLastName}
                               />
                             </FormControl>
@@ -420,12 +466,14 @@ export default function CheckoutPage() {
                       name="shippingAddress"
                       render={({ field }) => (
                         <FormItem className="space-y-2">
-                          <FormLabel className="text-base">Shipping Address <span className="text-red-500">*</span></FormLabel>
+                          <FormLabel className="text-base">
+                            Shipping Address <span className="text-red-500">*</span>
+                          </FormLabel>
                           <FormControl>
-                            <Input 
-                              {...field} 
-                              className="py-3 text-base" 
-                              required 
+                            <Input
+                              {...field}
+                              className="py-3 text-base"
+                              required
                               aria-invalid={!!checkoutForm.formState.errors.shippingAddress}
                             />
                           </FormControl>
@@ -441,9 +489,9 @@ export default function CheckoutPage() {
                           <FormItem className="space-y-2">
                             <FormLabel className="text-base">Apartment, Suite, etc.</FormLabel>
                             <FormControl>
-                              <Input 
-                                {...field} 
-                                className="py-3 text-base" 
+                              <Input
+                                {...field}
+                                className="py-3 text-base"
                                 aria-invalid={!!checkoutForm.formState.errors.shippingAddress2}
                               />
                             </FormControl>
@@ -452,18 +500,19 @@ export default function CheckoutPage() {
                         )}
                       />
 
-
                       <FormField
                         control={checkoutForm.control}
                         name="shippingPostalCode"
                         render={({ field }) => (
                           <FormItem className="space-y-2">
-                            <FormLabel className="text-base">Postal Code <span className="text-red-500">*</span></FormLabel>
+                            <FormLabel className="text-base">
+                              Postal Code <span className="text-red-500">*</span>
+                            </FormLabel>
                             <FormControl>
-                              <Input 
-                                {...field} 
-                                className="py-3 text-base" 
-                                required 
+                              <Input
+                                {...field}
+                                className="py-3 text-base"
+                                required
                                 aria-invalid={!!checkoutForm.formState.errors.shippingPostalCode}
                               />
                             </FormControl>
@@ -493,16 +542,14 @@ export default function CheckoutPage() {
                                 className="w-4 h-4"
                               />
                             </FormControl>
-                            <FormLabel className="text-base">
-                              Same as shipping address
-                            </FormLabel>
+                            <FormLabel className="text-base">Same as shipping address</FormLabel>
                           </div>
                           <FormMessage />
                         </FormItem>
                       )}
                     />
 
-                    {!checkoutForm.watch('sameAsShipping') && (
+                    {!checkoutForm.watch("sameAsShipping") && (
                       <div className="space-y-4">
                         <div className="grid grid-cols-2 gap-4">
                           <FormField
@@ -510,12 +557,14 @@ export default function CheckoutPage() {
                             name="billingAddressFirstName"
                             render={({ field }) => (
                               <FormItem className="space-y-2">
-                                <FormLabel className="text-base">First Name <span className="text-red-500">*</span></FormLabel>
+                                <FormLabel className="text-base">
+                                  First Name <span className="text-red-500">*</span>
+                                </FormLabel>
                                 <FormControl>
-                                  <Input 
-                                    {...field} 
-                                    className="py-3 text-base" 
-                                    required 
+                                  <Input
+                                    {...field}
+                                    className="py-3 text-base"
+                                    required
                                     aria-invalid={!!checkoutForm.formState.errors.billingAddressFirstName}
                                   />
                                 </FormControl>
@@ -528,12 +577,14 @@ export default function CheckoutPage() {
                             name="billingAddressLastName"
                             render={({ field }) => (
                               <FormItem className="space-y-2">
-                                <FormLabel className="text-base">Last Name <span className="text-red-500">*</span></FormLabel>
+                                <FormLabel className="text-base">
+                                  Last Name <span className="text-red-500">*</span>
+                                </FormLabel>
                                 <FormControl>
-                                  <Input 
-                                    {...field} 
-                                    className="py-3 text-base" 
-                                    required 
+                                  <Input
+                                    {...field}
+                                    className="py-3 text-base"
+                                    required
                                     aria-invalid={!!checkoutForm.formState.errors.billingAddressLastName}
                                   />
                                 </FormControl>
@@ -547,12 +598,14 @@ export default function CheckoutPage() {
                           name="billingAddress"
                           render={({ field }) => (
                             <FormItem className="space-y-2">
-                              <FormLabel className="text-base">Billing Address <span className="text-red-500">*</span></FormLabel>
+                              <FormLabel className="text-base">
+                                Billing Address <span className="text-red-500">*</span>
+                              </FormLabel>
                               <FormControl>
-                                <Input 
-                                  {...field} 
-                                  className="py-3 text-base" 
-                                  required 
+                                <Input
+                                  {...field}
+                                  className="py-3 text-base"
+                                  required
                                   aria-invalid={!!checkoutForm.formState.errors.billingAddress}
                                 />
                               </FormControl>
@@ -569,9 +622,9 @@ export default function CheckoutPage() {
                               <FormItem className="space-y-2">
                                 <FormLabel className="text-base">Apartment, Suite, etc.</FormLabel>
                                 <FormControl>
-                                  <Input 
-                                    {...field} 
-                                    className="py-3 text-base" 
+                                  <Input
+                                    {...field}
+                                    className="py-3 text-base"
                                     aria-invalid={!!checkoutForm.formState.errors.billingAddress2}
                                   />
                                 </FormControl>
@@ -580,18 +633,19 @@ export default function CheckoutPage() {
                             )}
                           />
 
-
                           <FormField
                             control={checkoutForm.control}
                             name="billingPostalCode"
                             render={({ field }) => (
                               <FormItem className="space-y-2">
-                                <FormLabel className="text-base">Postal Code <span className="text-red-500">*</span></FormLabel>
+                                <FormLabel className="text-base">
+                                  Postal Code <span className="text-red-500">*</span>
+                                </FormLabel>
                                 <FormControl>
-                                  <Input 
-                                    {...field} 
-                                    className="py-3 text-base" 
-                                    required 
+                                  <Input
+                                    {...field}
+                                    className="py-3 text-base"
+                                    required
                                     aria-invalid={!!checkoutForm.formState.errors.billingPostalCode}
                                   />
                                 </FormControl>
@@ -615,13 +669,11 @@ export default function CheckoutPage() {
                         name="cardNumber"
                         render={({ field }) => (
                           <FormItem className="space-y-2">
-                            <FormLabel className="text-base">Card Number <span className="text-red-500">*</span></FormLabel>
+                            <FormLabel className="text-base">
+                              Card Number <span className="text-red-500">*</span>
+                            </FormLabel>
                             <FormControl>
-                              <Input
-                                {...field}
-                                placeholder="4242 4242 4242 4242"
-                                className="py-5 text-base"
-                              />
+                              <Input {...field} placeholder="4242 4242 4242 4242" className="py-5 text-base" />
                             </FormControl>
                             <FormMessage />
                           </FormItem>
@@ -634,13 +686,11 @@ export default function CheckoutPage() {
                           name="expiration"
                           render={({ field }) => (
                             <FormItem className="space-y-2">
-                              <FormLabel className="text-base">Expiration <span className="text-red-500">*</span></FormLabel>
+                              <FormLabel className="text-base">
+                                Expiration <span className="text-red-500">*</span>
+                              </FormLabel>
                               <FormControl>
-                                <Input
-                                  {...field}
-                                  placeholder="MM/YY"
-                                  className="py-5 text-base"
-                                />
+                                <Input {...field} placeholder="MM/YY" className="py-5 text-base" />
                               </FormControl>
                               <FormMessage />
                             </FormItem>
@@ -651,13 +701,11 @@ export default function CheckoutPage() {
                           name="cvc"
                           render={({ field }) => (
                             <FormItem className="space-y-2">
-                              <FormLabel className="text-base">CVC <span className="text-red-500">*</span></FormLabel>
+                              <FormLabel className="text-base">
+                                CVC <span className="text-red-500">*</span>
+                              </FormLabel>
                               <FormControl>
-                                <Input
-                                  {...field}
-                                  placeholder="123"
-                                  className="py-5 text-base"
-                                />
+                                <Input {...field} placeholder="123" className="py-5 text-base" />
                               </FormControl>
                               <FormMessage />
                             </FormItem>
@@ -670,13 +718,11 @@ export default function CheckoutPage() {
                         name="name"
                         render={({ field }) => (
                           <FormItem className="space-y-2">
-                            <FormLabel className="text-base">Cardholder Name <span className="text-red-500">*</span></FormLabel>
+                            <FormLabel className="text-base">
+                              Cardholder Name <span className="text-red-500">*</span>
+                            </FormLabel>
                             <FormControl>
-                              <Input
-                                {...field}
-                                placeholder="John Doe"
-                                className="py-5 text-base"
-                              />
+                              <Input {...field} placeholder="John Doe" className="py-5 text-base" />
                             </FormControl>
                             <FormMessage />
                           </FormItem>
@@ -684,13 +730,17 @@ export default function CheckoutPage() {
                       />
                     </div>
 
-                    <div className="mt-6">
-                      <Button 
-                        type="submit" 
-                        className="w-full py-6 text-base" 
+                    <div className="mt-6 flex gap-4">
+                      <Button
+                        type="button"
+                        className="py-6 text-base flex-1"
                         size="lg"
-                        disabled={isProcessing}
+                        variant="outline"
+                        onClick={handleSimulateCardDecline}
                       >
+                        Simulate Card Decline
+                      </Button>
+                      <Button type="submit" className="py-6 text-base flex-1" size="lg" disabled={isProcessing}>
                         {isProcessing ? "Processing..." : `Pay $${totalPrice.toFixed(2)}`}
                       </Button>
                     </div>
@@ -725,4 +775,4 @@ export default function CheckoutPage() {
       </div>
     </div>
   );
-} 
+}

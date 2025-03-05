@@ -48,7 +48,10 @@ export async function POST(req: NextRequest): Promise<NextResponse<CheckoutRespo
   let shippingAddress: IAddress | null = null;
   if (!transaction.isDigitalDelivery) {
     if (!transaction.shippingAddress) {
-      return NextResponse.json({ success: false, error: "Shipping address is required for physical products" }, { status: 200 });
+      return NextResponse.json(
+        { success: false, error: "Shipping address is required for physical products" },
+        { status: 200 }
+      );
     }
     shippingAddress = {
       firstName: transaction.shippingAddress.firstName,

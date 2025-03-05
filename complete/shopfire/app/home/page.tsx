@@ -13,9 +13,13 @@ const fetchProducts = async (): Promise<Product[]> => {
 };
 
 export default function HomePage() {
-  const { data: products, isLoading, error } = useQuery({
+  const {
+    data: products,
+    isLoading,
+    error,
+  } = useQuery({
     queryKey: ["products"],
-    queryFn: fetchProducts
+    queryFn: fetchProducts,
   });
 
   const { addToCart } = useCartStore();
@@ -31,19 +35,13 @@ export default function HomePage() {
       <h1 className="text-3xl font-bold mb-8">Welcome to ShopFire</h1>
       <p className="mb-8">🔥🔥🔥 The one-stop shop when you have money to burn 🔥🔥🔥</p>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {isLoading ? (
-          Array(6).fill(0).map((_, i) => (
-            <Skeleton key={i} className="h-[400px] w-full rounded-lg" />
-          ))
-        ) : (
-          products?.map((product) => (
-            <ProductCard
-              key={product.id}
-              product={product}
-              onAddToCart={handleAddToCart}
-            />
-          ))
-        )}
+        {isLoading
+          ? Array(6)
+              .fill(0)
+              .map((_, i) => <Skeleton key={i} className="h-[400px] w-full rounded-lg" />)
+          : products?.map((product) => (
+              <ProductCard key={product.id} product={product} onAddToCart={handleAddToCart} />
+            ))}
       </div>
     </div>
   );
