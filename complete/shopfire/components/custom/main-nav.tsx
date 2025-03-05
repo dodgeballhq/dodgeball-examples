@@ -3,10 +3,7 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import {
-  Sheet,
-  SheetTrigger
-} from "@/components/ui/sheet";
+import { Sheet, SheetTrigger } from "@/components/ui/sheet";
 import { useUser } from "@/lib/api/users/use-user";
 import { useCartStore } from "@/lib/cart-store";
 import { getIsPublicRoute, NavigationRoutes } from "@/lib/navigation";
@@ -19,7 +16,7 @@ import {
   PanelLeftClose,
   PanelLeftOpen,
   ShoppingCart,
-  User
+  User,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -39,9 +36,9 @@ const navItems: NavItem[] = [
   { title: "Support", href: NavigationRoutes.SUPPORT, icon: <HelpCircle className="h-5 w-5" /> },
 ];
 
-interface MainNavProps { }
+interface MainNavProps {}
 
-export function MainNav({ }: MainNavProps) {
+export function MainNav({}: MainNavProps) {
   const [isExpanded, setIsExpanded] = useState(true);
   const pathname = usePathname();
   const isPublicRoute = getIsPublicRoute(pathname);
@@ -104,8 +101,8 @@ export function MainNav({ }: MainNavProps) {
         <div className="flex flex-grow border-b pb-1 w-full">
           <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
             <SheetTrigger asChild>
-              <Button 
-                variant="ghost" 
+              <Button
+                variant="ghost"
                 className={cn(
                   "flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors hover:bg-accent hover:text-accent-foreground",
                   !isExpanded && "justify-center"
@@ -115,20 +112,19 @@ export function MainNav({ }: MainNavProps) {
                 {isExpanded && (
                   <div className="flex items-center justify-between w-full">
                     <div>My Cart</div>
-                    <div className="rounded-full bg-primary px-2 py-1 text-xs text-primary-foreground">
-                      {cartCount}
-                    </div>
+                    <div className="rounded-full bg-primary px-2 py-1 text-xs text-primary-foreground">{cartCount}</div>
                   </div>
                 )}
               </Button>
             </SheetTrigger>
-            <CartSheetContent onClose={() => {
-              closeSheet();
-            }} />
+            <CartSheetContent
+              onClose={() => {
+                closeSheet();
+              }}
+            />
           </Sheet>
         </div>
         {navItems.map((item) => (
-
           <Link
             key={item.href}
             href={item.href}

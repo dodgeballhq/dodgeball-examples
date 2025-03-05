@@ -13,7 +13,7 @@
     "prisma:seed": "prisma db seed"
   },
   "dependencies": {
-    "@dodgeball/trust-sdk-client": "^0.0.38",
+    "@dodgeball/trust-sdk-client": "0.0.39",
     "@dodgeball/trust-sdk-server": "^0.0.24",
     "@faker-js/faker": "^9.4.0",
     "@hookform/resolvers": "^3.9.1",

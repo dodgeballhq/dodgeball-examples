@@ -12,7 +12,7 @@
     "prisma:migrate": "prisma migrate dev"
   },
   "dependencies": {
-    "@dodgeball/trust-sdk-client": "^0.0.38",
+    "@dodgeball/trust-sdk-client": "^0.0.39",
     "@dodgeball/trust-sdk-server": "^0.0.24",
     "@hookform/resolvers": "^3.9.1",
     "@prisma/client": "latest",

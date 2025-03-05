@@ -1,4 +1,4 @@
-const { PrismaClient } = require('@prisma/client');
+const { PrismaClient } = require("@prisma/client");
 
 const prisma = new PrismaClient();
 
@@ -9,12 +9,13 @@ async function main() {
         id: "1",
         name: "Emergency Marshmallow Toasting Kit",
         price: "39.99",
-        description: "24-hour survival kit for spontaneous campfire moments (includes 10 telescoping stainless steel skewers)",
+        description:
+          "24-hour survival kit for spontaneous campfire moments (includes 10 telescoping stainless steel skewers)",
         material: "Stainless steel/cotton",
         brand: "FlameReady",
         isDigital: false,
         picture: "/images/products/kit.webp",
-        isRecurring: false
+        isRecurring: false,
       },
       {
         id: "2",
@@ -25,7 +26,7 @@ async function main() {
         brand: "Inferno Foods",
         isDigital: false,
         picture: "/images/products/chili.webp",
-        isRecurring: false
+        isRecurring: false,
       },
       {
         id: "3",
@@ -36,7 +37,7 @@ async function main() {
         brand: "CozyBlaze",
         isDigital: false,
         picture: "/images/products/smores.webp",
-        isRecurring: false
+        isRecurring: false,
       },
       {
         id: "4",
@@ -47,7 +48,7 @@ async function main() {
         brand: "Lumberjack Labs",
         isDigital: false,
         picture: "/images/products/beard.webp",
-        isRecurring: false
+        isRecurring: false,
       },
       {
         id: "5",
@@ -58,18 +59,19 @@ async function main() {
         brand: "SafetyFun",
         isDigital: false,
         picture: "/images/products/candles.webp",
-        isRecurring: false
+        isRecurring: false,
       },
       {
         id: "6",
         name: "SmartFire AI-Powered Outdoor Fire Pit",
         price: "1499.99",
-        description: "WiFi-enabled fire pit with voice control and automatic weather adaptation (includes marshmallow doneness sensor)",
+        description:
+          "WiFi-enabled fire pit with voice control and automatic weather adaptation (includes marshmallow doneness sensor)",
         material: "Aerospace-grade stainless steel",
         brand: "LuxeFlame",
         isDigital: false,
         picture: "/images/products/firepit.webp",
-        isRecurring: false
+        isRecurring: false,
       },
       {
         id: "7",
@@ -80,7 +82,7 @@ async function main() {
         brand: "Sparky Academy",
         isDigital: true,
         picture: "/images/products/digital.webp",
-        isRecurring: false
+        isRecurring: false,
       },
       {
         id: "8",
@@ -91,13 +93,13 @@ async function main() {
         brand: "SafetyFun",
         isDigital: false,
         picture: "/images/products/refill.webp",
-        isRecurring: true
-      }
+        isRecurring: true,
+      },
     ].map(async (product) => {
       await prisma.product.upsert({
         where: { id: product.id },
         update: product,
-        create: product
+        create: product,
       });
     })
   );
@@ -110,4 +112,4 @@ main()
   })
   .finally(async () => {
     await prisma.$disconnect();
-  }); 
+  });
