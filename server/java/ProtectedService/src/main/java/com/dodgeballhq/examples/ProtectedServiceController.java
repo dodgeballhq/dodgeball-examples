@@ -1,6 +1,7 @@
 package com.dodgeballhq.examples;
 
 import com.dodgeballhq.protect.messages.CheckpointRequest;
+import com.dodgeballhq.protect.messages.CheckpointResponse;
 import com.dodgeballhq.protect.messages.DodgeballVerification;
 import com.dodgeballhq.protect.messages.Event;
 import io.github.cdimascio.dotenv.Dotenv;
@@ -31,7 +32,7 @@ class ProtectedServiceController {
     // Aggregate root
     // tag::get-aggregate-root[]
     @PostMapping("/checkpoint")
-    ResponseEntity<DodgeballVerification> invokeCheckpoint(@RequestBody ServiceRequest rawRequest) {
+    ResponseEntity<CheckpointResponse> invokeCheckpoint(@RequestBody ServiceRequest rawRequest) {
         try {
             Dodgeball dodgeball = Dodgeball.builder().
                     setApiKeys(this.apiSecret).
@@ -51,26 +52,28 @@ class ProtectedServiceController {
                     rawRequest.checkpointName,
                     rawRequest.sourceToken,
                     rawRequest.sessionId,
-                    rawRequest.userId
+                    rawRequest.userId,
+                    null,
+                    rawRequest.verificationId
             );
 
             var futureResponse = dodgeball.checkpoint(dbRequest);
             var response = futureResponse.join();
             if (Dodgeball.isAllowed(response)) {
-                return new ResponseEntity<DodgeballVerification>(
-                        response.verification,
+                return new ResponseEntity<>(
+                        response,
                         HttpStatus.OK);
             } else if (Dodgeball.isRunning(response)) {
-                return new ResponseEntity<DodgeballVerification>(
-                        response.verification,
+                return new ResponseEntity<>(
+                        response,
                         HttpStatus.ACCEPTED);
             } else if (Dodgeball.isDenied(response)) {
-                return new ResponseEntity<DodgeballVerification>(
-                        response.verification,
+                return new ResponseEntity<>(
+                        response,
                         HttpStatus.FORBIDDEN);
             } else {
-                return new ResponseEntity<DodgeballVerification>(
-                        response.verification,
+                return new ResponseEntity<>(
+                        response,
                         HttpStatus.INTERNAL_SERVER_ERROR);
             }
         } catch (Exception exception) {
