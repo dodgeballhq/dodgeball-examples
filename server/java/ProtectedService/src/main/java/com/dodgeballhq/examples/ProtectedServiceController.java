@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 
 import com.dodgeballhq.protect.Dodgeball;
 
-@CrossOrigin(origins = "http://localhost:3021")
+@CrossOrigin(origins = "http://localhost:3022")
 @RestController
 class ProtectedServiceController {
     private String apiUrl;

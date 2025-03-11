@@ -4,9 +4,14 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.dodgeballhq</groupId>
-    <artifactId>ProtectedService</artifactId>
-    <version>1.0-SNAPSHOT</version>
+
+
+    <groupId>com.dodgeballhq.examples</groupId>
+    <artifactId>protected-service</artifactId>
+    <version>1.0.0</version>
+    <packaging>jar</packaging>
+    <name>protected-service</name>
+    <description>Demo regarding the use of Dodgeball protect-core in a back end service</description>
 
     <dependencies>
         <dependency>
@@ -19,7 +24,7 @@
         <dependency>
             <groupId>com.dodgeballhq.protect</groupId>
             <artifactId>protect-core</artifactId>
-            <version>1.0.1</version>
+            <version>1.1.0-SNAPSHOT</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-dependencies -->
          <dependency>
